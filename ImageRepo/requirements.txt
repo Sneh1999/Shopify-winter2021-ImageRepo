@@ -1,0 +1,14 @@
+flask
+connexion
+pillow
+numpy
+pytest
+Flask-SQLAlchemy==2.1
+datetime
+connexion[swagger-ui]
+flask-marshmallow
+marshmallow-sqlalchemy 
+marshmallow
+openapi3
+google-cloud-storage
+firebase
