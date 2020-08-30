@@ -2,10 +2,18 @@ from flask import make_response, abort
 from config import db
 from PIL import Image
 import numpy as np
+from firebase import firebase
 from models import Images,ImageSchema
 import os
+import sys
+import requests
+import pyrebase
+from certificate import config
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="<add your credentials path>"
+firebase = pyrebase.initialize_app(config)
+storage = firebase.storage()
+path_on_cloud = "images-"
+
 
 def  upload():
     """
@@ -23,12 +31,18 @@ def  upload():
     file_path = {
         "image": "./images_dir/1.png"
     }
+    
+    
+   
     if file_path is not None:
       
         new_image = Images()
         new_image.image = file_path
         schema = ImageSchema()
-
+        path = path_on_cloud + file_path["image"]
+        storage.child(path).put(file_path["image"])
+        url = storage.child(path).get_url(None)   
+        file_path["image"] = url
         new_image_schema = schema.load(file_path, session=db.session)
         db.session.add(new_image_schema)
         db.session.commit()

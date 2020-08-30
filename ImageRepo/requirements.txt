@@ -10,5 +10,4 @@ flask-marshmallow
 marshmallow-sqlalchemy 
 marshmallow
 openapi3
-google-cloud-storage
-firebase
+pyrebase

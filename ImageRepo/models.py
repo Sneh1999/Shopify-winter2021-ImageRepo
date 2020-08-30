@@ -22,7 +22,7 @@ class Images(db.Model):
     __table__name = "image"
     image_id = db.Column(db.Integer, primary_key=True)
     # user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"))
-    image = db.Column(db.String, nullable=False)
+    image = db.Column(db.String(300), nullable=False)
     timestamp = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
