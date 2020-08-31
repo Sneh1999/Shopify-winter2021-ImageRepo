@@ -90,3 +90,22 @@ def download(image_id):
             "Image doesnt exist"
         )
 
+
+def delete_image(image_id):
+
+    existing_image = (
+        Images.query.filter(Images.image_id == image_id)
+        .one_or_none()
+    )
+
+    if existing_image is not None:
+        db.session.delete(existing_image)
+        db.session.commit()
+        return make_response(
+            "Image deleted", 200
+        )
+    else:
+        abort(
+            409,
+            "Image doesnt exist"
+        )

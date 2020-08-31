@@ -26,6 +26,8 @@ paths:
                     timestamp:
                       type: string
                       description: Creation/Update timestamp of the image
+   
+
   /images/upload:
     post:
       operationId: image.upload
@@ -57,7 +59,7 @@ paths:
               schema:
                 type: integer  
 
-  /images/download/{image_id}:
+  /images/{image_id}:
     post:
       operationId: image.download
       summary: Downloading an image
@@ -95,3 +97,19 @@ paths:
             application/json:
               schema:
                 type: integer
+    delete:
+      operationId: image.delete_image
+      summary: Delete an image
+      description: Delete an image
+      parameters:
+        - name: image_id
+          in: path
+          description: 'Id of the image'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successfully deleted a note
+        
