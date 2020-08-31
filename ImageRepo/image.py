@@ -1,18 +1,13 @@
 from flask import make_response, abort
 from config import db
-from PIL import Image
-import numpy as np
-from firebase import firebase
 from models import Images,ImageSchema
-import os
-import sys
-import requests
+from pathlib import Path
 import pyrebase
+import os
 from certificate import config
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
-path_on_cloud = "images-"
 
 
 def  upload():
@@ -29,20 +24,16 @@ def  upload():
     #     abort(404, f"Person not found for Id: {user_id}")
 
     file_path = {
-        "image": "./images_dir/1.png"
+        "image": "1.png"
     }
     
-    
-   
     if file_path is not None:
       
         new_image = Images()
         new_image.image = file_path
         schema = ImageSchema()
-        path = path_on_cloud + file_path["image"]
+        path =  file_path["image"]
         storage.child(path).put(file_path["image"])
-        url = storage.child(path).get_url(None)   
-        file_path["image"] = url
         new_image_schema = schema.load(file_path, session=db.session)
         db.session.add(new_image_schema)
         db.session.commit()
@@ -56,3 +47,46 @@ def  upload():
             409,
             "Not working fine"
         )
+
+
+def read_images():
+    """
+    This function responds to a request for /api/people
+    with the complete lists of people
+
+    :return:        json string of list of people
+    """
+    # Create the list of people from our data
+    image = Images.query.order_by(Images.timestamp).all()
+
+    # Serialize the data for the response
+    image_schema = ImageSchema(many=True)
+    data = image_schema.dump(image)
+    return data,200
+
+
+def download(image_id):
+    """
+    This function responds to a request for /api/people
+    with the complete lists of people
+
+    :return:        json string of list of people
+    """
+    existing_image = (
+        Images.query.filter(Images.image_id == image_id)
+        .one_or_none()
+    )
+    
+    if existing_image is not None:
+        path_to_download_folder = str(os.path.join(Path.home(), "Downloads"))
+        storage.child(existing_image.image).download(str(existing_image.image_id) + ".jpg")
+        schema = ImageSchema()
+        data = schema.dump(existing_image)
+
+        return  data,200
+    else:
+        abort(
+            409,
+            "Image doesnt exist"
+        )
+

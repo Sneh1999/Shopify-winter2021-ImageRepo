@@ -3,7 +3,30 @@ info:
   title: Simple API overview
   version: 2.0.0
 paths:
-  /upload:
+  /images:
+    get:
+      operationId: image.read_images
+      summary: Reading a list  of images
+      responses:
+        '200':
+          description: >-
+            The images have been read
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    image_id:
+                      type: string
+                      description: Id of the image
+                    image:
+                      type: string
+                      description: url of the image
+                    timestamp:
+                      type: string
+                      description: Creation/Update timestamp of the image
+  /images/upload:
     post:
       operationId: image.upload
       summary: Uploading a list  of images
@@ -29,6 +52,45 @@ paths:
         '404':
           description: >-
             The set of images cant be uploaded 
+          content:
+            application/json:
+              schema:
+                type: integer  
+
+  /images/download/{image_id}:
+    post:
+      operationId: image.download
+      summary: Downloading an image
+      parameters:
+        - name: image_id
+          in: path
+          description: 'Id of the image'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: >-
+            The images have been read
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    image_id:
+                      type: string
+                      description: Id of the image
+                    image:
+                      type: string
+                      description: url of the image
+                    timestamp:
+                      type: string
+                      description: Creation/Update timestamp of the image
+        '404':
+          description: >-
+            The set of images cant be downloaded
           content:
             application/json:
               schema:
