@@ -3,6 +3,99 @@ info:
   title: Simple API overview
   version: 2.0.0
 paths:
+  /users:
+    post:
+      operationId: user.create
+      summary: Create an user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fname:
+                  type: string
+                  description: First name of the user
+                lname:
+                  type: string
+                  description: Last name of the user
+                email:
+                  type: string
+                  description: email of the user
+      responses:
+        '200':
+          description: >-
+            The user has been created
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  properties:
+                    user_id:
+                      type: string
+                      description: Id of the user
+                    fname:
+                      type: string
+                      description: First name of the user
+                    lname:
+                      type: string
+                      description: Last name of the user
+                    email:
+                      type: string
+                      description: email of the user
+  /users/{user_id}:
+    get:
+      operationId: user.get_user
+      summary: Get a particular user
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: >-
+            The user has been read
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  properties:
+                    user_id:
+                      type: string
+                      description: Id of the image
+                    fname:
+                      type: string
+                      description: first name of the user
+                    lname:
+                      type: string
+                      description: last name of the user
+                    images:
+                      type: array
+                      description: Array of the images
+                      items:
+                        properties:
+                          image_id:
+                            type: string
+                            description: Id of the image
+                          user_id:
+                            type: string
+                            description: Id of the image
+                          image:
+                            type: string
+                            description: url of the image
+                          timestamp:
+                            type: string
+                            description: Creation/Update timestamp of the image
+                    timestamp:
+                      type: string
+                      description: Creation/Update timestamp of the image
+      
   /images:
     get:
       operationId: image.read_images
@@ -20,6 +113,9 @@ paths:
                     image_id:
                       type: string
                       description: Id of the image
+                    user_id:
+                      type: string
+                      description: Id of the image
                     image:
                       type: string
                       description: url of the image
@@ -27,11 +123,18 @@ paths:
                       type: string
                       description: Creation/Update timestamp of the image
    
-
-  /images/upload:
+  /images/upload/{user_id}:
     post:
       operationId: image.upload
       summary: Uploading a list  of images
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
       requestBody:
         content:
           multipart/form-data:
@@ -59,7 +162,7 @@ paths:
               schema:
                 type: integer  
 
-  /images/{image_id}:
+  /users/{user_id}/images/{image_id}:
     post:
       operationId: image.download
       summary: Downloading an image
@@ -67,6 +170,13 @@ paths:
         - name: image_id
           in: path
           description: 'Id of the image'
+          required: true
+          example: 1
+          schema:
+            type: integer
+        - name: user_id
+          in: path
+          description: 'Id of the user'
           required: true
           example: 1
           schema:
@@ -84,6 +194,9 @@ paths:
                     image_id:
                       type: string
                       description: Id of the image
+                    user_id:
+                      type: string
+                      description: Id of the user
                     image:
                       type: string
                       description: url of the image
@@ -109,7 +222,14 @@ paths:
           example: 1
           schema:
             type: integer
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
       responses:
         200:
-          description: Successfully deleted a note
+          description: Successfully deleted an image
         
