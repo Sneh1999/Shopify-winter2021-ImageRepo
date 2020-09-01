@@ -129,12 +129,20 @@ paths:
                       description: Creation/Update timestamp of the image
         '401':
           $ref: '#/components/responses/UnauthorizedError'              
-  /images:
+  /images/{user_id}:
     get:
       security:
         - bearerAuth: []
       operationId: image.read_images
       summary: Reading a list  of images
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
       responses:
         '200':
           description: >-
@@ -159,7 +167,6 @@ paths:
                       description: Creation/Update timestamp of the image
         '401':
           $ref: '#/components/responses/UnauthorizedError'              
-  /images/upload/{user_id}:
     post:
       security:
         - bearerAuth: []

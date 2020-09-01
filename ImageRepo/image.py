@@ -5,6 +5,7 @@ from pathlib import Path
 import pyrebase
 import os
 from certificate import config
+import connexion
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
@@ -18,6 +19,14 @@ def  upload(user_id):
     :param person_id:   Id of person to find
     :return:            Integer
     """
+    token_info = connexion.context['token_info']
+   
+    if token_info['sub'] != str(user_id):
+        abort(
+            401,
+            "Unauthorized"
+        )
+    
     user = User.query.filter(User.user_id == user_id).one_or_none()
     
     if user is None:
@@ -49,13 +58,20 @@ def  upload(user_id):
         )
 
 
-def read_images():
+def read_images(user_id):
     """
     This function responds to a request for /api/people
     with the complete lists of people
 
     :return:        json string of list of people
     """
+    token_info = connexion.context['token_info']
+   
+    if token_info['sub'] != str(user_id):
+        abort(
+            401,
+            "Unauthorized"
+        )
     # Create the list of people from our data
     image = Images.query.order_by(Images.timestamp).all()
 
@@ -72,6 +88,14 @@ def download(user_id,image_id):
 
     :return:        json string of list of people
     """
+    token_info = connexion.context['token_info']
+   
+    if token_info['sub'] != str(user_id):
+        abort(
+            401,
+            "Unauthorized"
+        )
+    
     existing_image = (
         Images.query.filter(Images.image_id == image_id)
         .filter(Images.user_id == user_id)
@@ -93,6 +117,14 @@ def download(user_id,image_id):
 
 
 def delete_image(user_id,image_id):
+
+    token_info = connexion.context['token_info']
+   
+    if token_info['sub'] != str(user_id):
+        abort(
+            401,
+            "Unauthorized"
+        )
 
     existing_image = (
         Images.query.filter(Images.image_id == image_id)

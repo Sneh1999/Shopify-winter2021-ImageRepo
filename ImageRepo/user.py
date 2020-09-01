@@ -24,10 +24,12 @@ def create():
     user = connexion.request.get_json()
     fname = user.get("fname")
     lname = user.get("lname")
+    email = user.get("email")
 
     existing_user = (
         User.query.filter(User.fname == fname)
         .filter(User.lname == lname)
+        .filter(User.email == email)
         .one_or_none()
     )
 
@@ -66,6 +68,13 @@ def get_user(user_id):
     :return:            person matching id
     """
     # Get the person requested
+    token_info = connexion.context['token_info']
+   
+    if token_info['sub'] != str(user_id):
+        abort(
+            401,
+            "Unauthorized"
+        )
     user = User.query.filter(User.user_id == user_id).outerjoin(Images).one_or_none()
 
     # Did we find a person?
