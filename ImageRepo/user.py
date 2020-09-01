@@ -11,6 +11,8 @@ import connexion
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
 
+
+
 def create():
     """
     This function creates a new person in the people structure

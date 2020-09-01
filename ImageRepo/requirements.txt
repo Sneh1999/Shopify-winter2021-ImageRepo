@@ -1,8 +1,10 @@
 flask
-connexion
+connexion==2.6.0
 pillow
 numpy
 pytest
+python-jose[cryptography]
+six>=1.9
 Flask-SQLAlchemy==2.1
 datetime
 connexion[swagger-ui]

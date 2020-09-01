@@ -3,8 +3,36 @@ info:
   title: Simple API overview
   version: 2.0.0
 paths:
+  /auth/{user_id}:
+    get:
+      summary: Return JWT token
+      operationId: auth.generate_token
+      parameters:
+      - name: user_id
+        description: User unique identifier
+        in: path
+        required: true
+        example: 12
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: JWT token
+          content:
+            'text/plain':
+              schema:
+                type: string
+      responses:
+        '200':
+          description: JWT token
+          content:
+            'text/plain':
+              schema:
+                type: string
   /users:
     post:
+      security:
+        - bearerAuth: []
       operationId: user.create
       summary: Create an user
       requestBody:
@@ -44,8 +72,12 @@ paths:
                     email:
                       type: string
                       description: email of the user
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /users/{user_id}:
     get:
+      security:
+        - bearerAuth: []
       operationId: user.get_user
       summary: Get a particular user
       parameters:
@@ -95,9 +127,12 @@ paths:
                     timestamp:
                       type: string
                       description: Creation/Update timestamp of the image
-      
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'              
   /images:
     get:
+      security:
+        - bearerAuth: []
       operationId: image.read_images
       summary: Reading a list  of images
       responses:
@@ -122,9 +157,12 @@ paths:
                     timestamp:
                       type: string
                       description: Creation/Update timestamp of the image
-   
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'              
   /images/upload/{user_id}:
     post:
+      security:
+        - bearerAuth: []
       operationId: image.upload
       summary: Uploading a list  of images
       parameters:
@@ -160,10 +198,14 @@ paths:
           content:
             application/json:
               schema:
-                type: integer  
+                type: integer 
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
 
   /users/{user_id}/images/{image_id}:
     post:
+      security:
+        - bearerAuth: []
       operationId: image.download
       summary: Downloading an image
       parameters:
@@ -210,7 +252,11 @@ paths:
             application/json:
               schema:
                 type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
     delete:
+      security:
+        - bearerAuth: []
       operationId: image.delete_image
       summary: Delete an image
       description: Delete an image
@@ -230,6 +276,20 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: Successfully deleted an image
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+# 1) Define the security scheme type (HTTP bearer)
+components:
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+      x-bearerInfoFunc: auth.decode_token
         
