@@ -1,4 +1,4 @@
-from flask import make_response, abort
+from flask import make_response, abort,request
 from config import db
 from models import Images,ImageSchema,User,UserSchema
 from pathlib import Path
@@ -6,6 +6,7 @@ import pyrebase
 import os
 from certificate import config
 import connexion
+from io import BufferedReader
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
@@ -32,8 +33,10 @@ def  upload(user_id):
     if user is None:
         abort(404, f"Person not found for Id: {user_id}")
 
+    file = connexion.request.files['filename']
+ 
     file_path = {
-        "image": "1.png"
+        "image": file.filename
     }
     
     if file_path is not None:
@@ -42,7 +45,9 @@ def  upload(user_id):
         new_image.image = file_path
         schema = ImageSchema()
         path =  file_path["image"]
-        storage.child(path).put(file_path["image"])
+        image = file
+        image.name = image.filename
+        storage.child(path).put(image)
         new_image_schema = schema.load(file_path, session=db.session)
         user.images.append(new_image_schema)
         db.session.commit()

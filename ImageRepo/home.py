@@ -1,5 +1,4 @@
 from flask import (Flask,render_template)
-
 import connexion
 
 #Create the application instance 
@@ -14,6 +13,7 @@ app.app.config['SECRET_KEY'] =  'thisisasecretkey'
 @app.route('/')
 def home():
     return render_template("home.htm")
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

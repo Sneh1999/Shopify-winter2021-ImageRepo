@@ -3,18 +3,22 @@ info:
   title: Simple API overview
   version: 2.0.0
 paths:
-  /auth/{user_id}:
-    get:
+  /login:
+    post:
       summary: Return JWT token
       operationId: auth.generate_token
-      parameters:
-      - name: user_id
-        description: User unique identifier
-        in: path
-        required: true
-        example: 12
-        schema:
-          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: Email of the user
+                password:
+                  type: string
+                  description: Password of the user
       responses:
         '200':
           description: JWT token
@@ -31,8 +35,6 @@ paths:
                 type: string
   /users:
     post:
-      security:
-        - bearerAuth: []
       operationId: user.create
       summary: Create an user
       requestBody:
@@ -50,6 +52,9 @@ paths:
                 email:
                   type: string
                   description: email of the user
+                password:
+                  type: string
+                  description: password of the user
       responses:
         '200':
           description: >-
@@ -129,7 +134,7 @@ paths:
                       description: Creation/Update timestamp of the image
         '401':
           $ref: '#/components/responses/UnauthorizedError'              
-  /images/{user_id}:
+  /users/{user_id}/images:
     get:
       security:
         - bearerAuth: []
@@ -187,8 +192,6 @@ paths:
               type: object
               properties:
                 filename:
-                  type: array
-                  items:
                     type: string
                     format: binary
       responses:

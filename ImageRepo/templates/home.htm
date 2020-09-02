@@ -1,24 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Authentication Example</title>
+    <meta charset="UTF-8">
+    <title>Application Home Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+    <link rel="stylesheet" href="static/css/home.css">
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-analytics.js"></script>
+
+    <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyClKuvKfwv2d7XA_qHqL0Sh5xyk5YWydYk",
+        authDomain: "shopify-d7101.firebaseapp.com",
+        databaseURL: "https://shopify-d7101.firebaseio.com",
+        projectId: "shopify-d7101",
+        storageBucket: "shopify-d7101.appspot.com",
+        messagingSenderId: "673314905550",
+        appId: "1:673314905550:web:af740079012e599b65df9f",
+        measurementId: "G-FK0Z0X7T29"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    </script>
+
 </head>
 
-<body>
-  <form>
-    <div>
-      <input id="email" type="text" placeholder="Email...">
-    </div>
-    <div>
-      <input id="password" type="password" placeholder="Password...">
-    </div>
-    <div>
-      <button id="sign-in">Sign In/Register</button>
-      <button id="sign-out">Sign Out</button>
-    </div>
-  </form>
+<body> 
 
-  
+       <button id="login_btn">
+            Login
+       </button>
+       Select images: <input type="file" id="filesToUpload" multiple><br/>
+<input type="submit" name="UploadImage" id="UploadImage" value="Upload">
+
 </body>
-
+<script src="static/js/home.js"></script>
 </html>

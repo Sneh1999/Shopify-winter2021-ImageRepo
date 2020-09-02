@@ -13,3 +13,4 @@ marshmallow-sqlalchemy
 marshmallow
 openapi3
 pyrebase
+passlib

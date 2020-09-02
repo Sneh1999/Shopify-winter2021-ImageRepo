@@ -10,7 +10,7 @@ class User(db.Model):
     lname = db.Column(db.String(32))
     fname = db.Column(db.String(32))
     email = db.Column(db.String(120), unique=True, nullable=False)
-    
+    password = db.Column(db.String(100))
     images = db.relationship(
         "Images",
         backref="user",
@@ -66,4 +66,5 @@ class ImageUserSchema(ModelSchema):
     lname = fields.Str()
     fname = fields.Str()
     email = fields.Str()
+    password = fields.Str()
     timestamp = fields.Str()

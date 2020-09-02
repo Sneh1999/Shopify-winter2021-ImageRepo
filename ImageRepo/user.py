@@ -7,6 +7,15 @@ import os
 from certificate import config
 import connexion
 
+from passlib.context import CryptContext
+
+
+# create CryptContext object
+context = CryptContext(
+        schemes=["pbkdf2_sha256"],
+        default="pbkdf2_sha256",
+        pbkdf2_sha256__default_rounds=50000
+)
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
@@ -25,7 +34,9 @@ def create():
     fname = user.get("fname")
     lname = user.get("lname")
     email = user.get("email")
-
+    password = user.get("password")
+    user["password"]= context.hash(password)
+    print(password,flush=True)
     existing_user = (
         User.query.filter(User.fname == fname)
         .filter(User.lname == lname)
@@ -46,7 +57,7 @@ def create():
 
         # Serialize and return the newly created person in the response
         data = schema.dump(new_person)
-
+        del data['password']
         return data, 201
 
     # Otherwise, nope, person exists already
@@ -83,6 +94,7 @@ def get_user(user_id):
         # Serialize the data for the response
         user_schema = UserSchema()
         data = user_schema.dump(user)
+        del data['password']
         return data
 
     # Otherwise, nope, didn't find that person
