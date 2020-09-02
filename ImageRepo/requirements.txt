@@ -2,8 +2,6 @@ flask
 connexion==2.6.0
 pillow
 wget
-numpy
-pytest
 python-jose[cryptography]
 six>=1.9
 Flask-SQLAlchemy==2.1
