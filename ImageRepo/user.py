@@ -36,7 +36,6 @@ def create():
     email = user.get("email")
     password = user.get("password")
     user["password"]= context.hash(password)
-    print(password,flush=True)
     existing_user = (
         User.query.filter(User.fname == fname)
         .filter(User.lname == lname)

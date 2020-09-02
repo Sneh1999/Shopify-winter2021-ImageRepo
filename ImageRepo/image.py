@@ -4,9 +4,11 @@ from models import Images,ImageSchema,User,UserSchema
 from pathlib import Path
 import pyrebase
 import os
+import wget
 from certificate import config
 import connexion
 from io import BufferedReader
+
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
@@ -109,10 +111,11 @@ def download(user_id,image_id):
     
     if existing_image is not None:
         path_to_download_folder = str(os.path.join(Path.home(), "Downloads"))
-        storage.child(existing_image.image).download(str(existing_image.image_id) + ".jpg")
+        url = storage.child(existing_image.image).get_url(None)
+        # TODO complete with ssl certificate
+        # image_filename = wget.download(url)
         schema = ImageSchema()
         data = schema.dump(existing_image)
-
         return  data,200
     else:
         abort(
@@ -137,7 +140,9 @@ def delete_image(user_id,image_id):
         .one_or_none()
     )
 
+
     if existing_image is not None:
+        storage.delete(existing_image.image)
         db.session.delete(existing_image)
         db.session.commit()
         return make_response(
