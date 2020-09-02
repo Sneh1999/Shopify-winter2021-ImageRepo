@@ -1,6 +1,6 @@
 import os
 from config import db
-from models import Images
+from models import Image
 
 # Delete database file if it  already exiata currently
 if os.path.exists('user.db'):

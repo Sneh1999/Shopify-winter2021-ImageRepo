@@ -41,7 +41,7 @@ function post_data_to_api(images_to_upload) {
     data = {
         "images_data":JSON.stringify(images_to_upload) ,
         };
-      url = "http://0.0.0.0:5000/api/uploadmultipleimg";
+      url = "http://0.0.0.0:5000/api/uploadmultipleimg=";
       $.ajax({
         type: "POST",
         url: url,

@@ -56,7 +56,7 @@ def  upload(user_id):
 
         # Serialize and return the newly created person in the response
         data = schema.dump(new_image)
-
+        # TODO : change it from 0 to actual data
         return 0, 201
     else:
         abort(
