@@ -5,7 +5,7 @@ from flask import make_response, abort
 import six
 from werkzeug.exceptions import Unauthorized
 from jose import JWTError, jwt
-from models import Images,ImageSchema,User,UserSchema
+from models import Images,ImageSchema,User,UserSchema,permissions
 
 from passlib.context import CryptContext
 
@@ -46,7 +46,7 @@ def generate_token():
                 "iss": JWT_ISSUER,
                 "iat": int(timestamp),
                 "exp": int(timestamp + JWT_LIFETIME_SECONDS),
-                "sub": str(existing_user.user_id),
+                "sub": str(existing_user.id),
             }
 
             return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -77,4 +77,3 @@ def get_secret(user, token_info) -> str:
 
 def _current_timestamp() -> int:
     return int(time.time())
-

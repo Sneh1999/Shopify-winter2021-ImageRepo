@@ -26,13 +26,7 @@ paths:
             'text/plain':
               schema:
                 type: string
-      responses:
-        '200':
-          description: JWT token
-          content:
-            'text/plain':
-              schema:
-                type: string
+
   /users:
     post:
       operationId: user.create
@@ -213,19 +207,70 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 
   /users/{user_id}/images/{image_id}:
+    # get:
+    #   security:
+    #     - bearerAuth: []
+    #   operationId: image.get_access
+    #   summary: Access of an image
+    #   parameters:
+    #     - name: user_id
+    #       in: path
+    #       description: 'Id of the user'
+    #       required: true
+    #       example: 1
+    #       schema:
+    #         type: integer
+    #     - name: image_id
+    #       in: path
+    #       description: 'Id of the user'
+    #       required: true
+    #       example: 1
+    #       schema:
+    #         type: integer
+    #     - in: query
+    #       name: email
+    #       description: email of the user
+    #       schema:
+    #         type: string
+    #   responses:
+    #       '200':
+    #         description: >-
+    #           The images have been uploaded
+    #         content:
+    #           application/json:
+    #             schema:
+    #               type: object
+    #               items:
+    #                 properties:
+    #                   user_id:
+    #                     type: string
+    #                     description: Id of the user
+    #                   image_id:
+    #                     type: string
+    #                     description: Id of the image
+    #                   permission_id:
+    #                     type: string
+    #                     description: Id of the permission
+    #                   timestamp:
+    #                         type: string
+    #                         description: Creation/Update timestamp of the permission
+    #       '404':
+    #         description: >-
+    #           The image and user could not be found
+    #         content:
+    #           application/json:
+    #             schema:
+    #               type: integer 
+    #       '401':
+    #         $ref: '#/components/responses/UnauthorizedError'
+      
+
     post:
       security:
         - bearerAuth: []
-      operationId: image.download
-      summary: Downloading an image
+      operationId: image.create_access
+      summary: Access of an image
       parameters:
-        - name: image_id
-          in: path
-          description: 'Id of the image'
-          required: true
-          example: 1
-          schema:
-            type: integer
         - name: user_id
           in: path
           description: 'Id of the user'
@@ -233,35 +278,37 @@ paths:
           example: 1
           schema:
             type: integer
+        - name: image_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: email of the user
       responses:
         '200':
           description: >-
-            The images have been read
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  properties:
-                    image_id:
-                      type: string
-                      description: Id of the image
-                    user_id:
-                      type: string
-                      description: Id of the user
-                    image:
-                      type: string
-                      description: url of the image
-                    timestamp:
-                      type: string
-                      description: Creation/Update timestamp of the image
-        '404':
-          description: >-
-            The set of images cant be downloaded
+            The images have been uploaded
           content:
             application/json:
               schema:
                 type: integer
+        '404':
+          description: >-
+            The set of images cant be uploaded 
+          content:
+            application/json:
+              schema:
+                type: integer 
         '401':
           $ref: '#/components/responses/UnauthorizedError'
     delete:
@@ -290,6 +337,8 @@ paths:
           description: Successfully deleted an image
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  
+  
 
 # 1) Define the security scheme type (HTTP bearer)
 components:
@@ -302,4 +351,5 @@ components:
       scheme: bearer
       bearerFormat: JWT    # optional, arbitrary value for documentation purposes
       x-bearerInfoFunc: auth.decode_token
-        
+  
+

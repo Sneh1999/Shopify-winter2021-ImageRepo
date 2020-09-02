@@ -30,7 +30,7 @@ def  upload(user_id):
             "Unauthorized"
         )
     
-    user = User.query.filter(User.user_id == user_id).one_or_none()
+    user = User.query.filter(User.id == user_id).one_or_none()
     
     if user is None:
         abort(404, f"Person not found for Id: {user_id}")
@@ -56,7 +56,7 @@ def  upload(user_id):
 
         # Serialize and return the newly created person in the response
         data = schema.dump(new_image)
-        # TODO : change it from 0 to actual data
+
         return 0, 201
     else:
         abort(
@@ -81,7 +81,7 @@ def read_images(user_id):
         )
     # Create the list of people from our data
     image = Images.query.order_by(Images.timestamp).all()
-
+    
     # Serialize the data for the response
     image_schema = ImageSchema(many=True)
     data = image_schema.dump(image)
@@ -104,8 +104,7 @@ def download(user_id,image_id):
         )
     
     existing_image = (
-        Images.query.filter(Images.image_id == image_id)
-        .filter(Images.user_id == user_id)
+        Images.query.filter(Images.id == image_id)
         .one_or_none()
     )
     
@@ -135,8 +134,8 @@ def delete_image(user_id,image_id):
         )
 
     existing_image = (
-        Images.query.filter(Images.image_id == image_id)
-        .filter(Images.user_id == user_id)
+        Images.query.filter(Images.id == image_id)
+        .filter(Images.id == user_id)
         .one_or_none()
     )
 
@@ -152,4 +151,42 @@ def delete_image(user_id,image_id):
         abort(
             409,
             "Image doesnt exist"
+        )
+
+def create_access(user_id,image_id):
+    """
+    This function responds to a request for /api/people
+    with the complete lists of people
+
+    :return:        json string of list of people
+    """
+    token_info = connexion.context['token_info']
+   
+    if token_info['sub'] != str(user_id):
+        abort(
+            401,
+            "Unauthorized"
+        )
+
+    email = connexion.request.get_json()
+    user = User.query.filter(User.id == user_id).one_or_none()
+    email_user = User.query.filter(User.email == email["email"]).one_or_none()
+    image = Images.query.filter(Images.id == image_id).one_or_none()
+    if user and email_user and image: 
+        file_path = {
+            "image": image.image
+        }
+        schema = ImageSchema()
+        new_image_schema = schema.load(file_path, session=db.session)
+        email_user.images.append(new_image_schema)
+        db.session.commit()
+
+            # Serialize and return the newly created person in the response
+        data = schema.dump(email_user)
+
+        return 0, 201
+    else:
+        abort(
+            409,
+            "Not working fine"
         )

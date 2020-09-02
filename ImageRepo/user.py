@@ -85,7 +85,7 @@ def get_user(user_id):
             401,
             "Unauthorized"
         )
-    user = User.query.filter(User.user_id == user_id).outerjoin(Images).one_or_none()
+    user = User.query.filter(User.id == user_id).outerjoin(Images).one_or_none()
 
     # Did we find a person?
     if user is not None:
