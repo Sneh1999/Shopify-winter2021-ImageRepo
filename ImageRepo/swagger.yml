@@ -26,6 +26,14 @@ paths:
             'text/plain':
               schema:
                 type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'   
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
 
   /users:
     post:
@@ -333,7 +341,7 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        '204':
           description: Successfully deleted an image
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -342,14 +350,33 @@ paths:
 
 # 1) Define the security scheme type (HTTP bearer)
 components:
+  schemas:
+    GeneralError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
   responses:
     UnauthorizedError:
-      description: Access token is missing or invalid
+      description: Unauthorized
+    NotFound:
+      description: The specified resource was not found
+    BadRequest:
+      description: Illegal Inputs provided
+    GeneralError:
+      description: General Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeneralError'
+        
   securitySchemes:
     bearerAuth:            # arbitrary name for the security scheme
       type: http
       scheme: bearer
       bearerFormat: JWT    # optional, arbitrary value for documentation purposes
       x-bearerInfoFunc: auth.decode_token
-  
-

@@ -30,8 +30,6 @@ class User(db.Model):
     )
 
 
-
-
 class UserSchema(ModelSchema):
     images = fields.Nested("ImageSchema",  many=True)
     class Meta:
@@ -39,13 +37,18 @@ class UserSchema(ModelSchema):
         sqla_session = db.session
 
 
-
-
-
 class ImageSchema(ModelSchema):
     
     class Meta:
         model = Images
         sqla_session = db.session
+
+# TODO : convert and run on from http to https
+# TODO : add  cascade delete 
+# TODO : check if whatever thats returned from openapi3 is valid
+# TODO:  check that only valid files get added
+# TODO: Ensure you  keep the secret  keys somewhere
+# TODO: Add definitions
+
 
 
