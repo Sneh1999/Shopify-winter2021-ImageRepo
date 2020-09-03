@@ -2,44 +2,70 @@ from flask import make_response, abort,request
 from config import db
 from models import Images,ImageSchema,User,UserSchema
 from pathlib import Path
+import sys
 import pyrebase
 import os
+import imghdr
 import wget
 from certificate import config
 import connexion
 from io import BufferedReader
 
+# TODO: password field still returning
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
 
+supported_types = ['image/bmp','image/dds','image/exif','image/gif','image/jpg','image/jpeg','image/jp2','image/jpx','image/pcx','image/png','image/pnm','image/ras','image/tga','image/tif','image/tiff','image/xbm','image/xpm']
+
+admin_user = 1
+
+MAX_IMAGE_SIZE = 10*1024*1024 
+MIN_IMAGE_SIZE = 10*1024
 
 def  upload(user_id):
     """
-    This function responds to a request for /api/upload
-    to upload a list of images
-
-    :param person_id:   Id of person to find
-    :return:            Integer
+    This function uploads an image
+    :param user_id:   Id of user
+    :return:          201 on success
     """
     token_info = connexion.context['token_info']
    
-    if token_info['sub'] != str(user_id):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != str(admin_user):
         abort(
-            401,
-            "Unauthorized"
+            403,
+            "Forbidden: The given user doesnt have access to uoload an image"
         )
+    
+    if user_id is None or user_id is "":
+        abort(
+            400,
+            "Bad Request: Please send valid user_id"
+        )
+
+    file = connexion.request.files['filename']
+    blob = file.read()
+    size = len(blob)
+    print(file.content_type,flush=True)
+    # Allowing only the file size between 2 to 10 kb
+    if file is None  or (file.filename is None) or (file.content_type not in supported_types) or (size < MIN_IMAGE_SIZE or size > MAX_IMAGE_SIZE ):
+        abort(
+            400,
+            "Bad Request: Please send a valid file"
+        )
+
+    
+
+    file_path = {
+        "image": file.filename
+    }
     
     user = User.query.filter(User.id == user_id).one_or_none()
     
     if user is None:
-        abort(404, f"Person not found for Id: {user_id}")
-
-    file = connexion.request.files['filename']
- 
-    file_path = {
-        "image": file.filename
-    }
+        abort(
+            404, f"Person not found for Id: {user_id}"
+            )
     
     if file_path is not None:
       
@@ -190,3 +216,14 @@ def create_access(user_id,image_id):
             409,
             "Not working fine"
         )
+
+
+
+def convert_bytes(num):
+    """
+    this function will convert bytes to MB.... GB... etc
+    """
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
