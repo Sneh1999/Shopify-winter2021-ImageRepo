@@ -20,7 +20,10 @@ class User(db.Model):
     lname = db.Column(db.String(32))
     fname = db.Column(db.String(32))
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(100))
+    password = db.deferred(db.Column(db.String(100)))
+    timestamp = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
     images = db.relationship(
         "Images",
         secondary = "permissions",

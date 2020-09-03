@@ -60,7 +60,7 @@ def generate_token():
         if verify_password is False:
             abort(
                 401,
-                "Unauthorized"
+                "Unauthorized: Please verufy your password"
             )
         
         timestamp = int(time.time())

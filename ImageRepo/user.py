@@ -24,18 +24,42 @@ storage = firebase.storage()
 
 def create():
     """
-    This function creates a new person in the people structure
-    based on the passed in person data
+    This function creates a new user in the user structure
 
-    :param person:  person to create in people structure
+    :param user:  person to create in people structure
     :return:        201 on success, 406 on person exists
     """
+    # Get the user from the request body
     user = connexion.request.get_json()
+    #  Verify that the user is not none
+    if user is None:
+        abort(
+            400,
+            "Bad Request: Please send valid user"
+        )
+    
     fname = user.get("fname")
     lname = user.get("lname")
     email = user.get("email")
     password = user.get("password")
+
+    # Check if the data within the user is not None
+    if fname is None or lname is None or email is None or password is None:
+        abort(
+            400,
+            "Bad Request: Please send valid user"
+        )
+
+    if fname is "" or lname is "" or email is "" or password is "":
+        abort(
+            400,
+            "Bad Request: Please send valid user"
+        )
+        
+    # Create a hash for the password, to prevent direct storage of the password
     user["password"]= context.hash(password)
+
+    # Check if there is an existing user
     existing_user = (
         User.query.filter(User.fname == fname)
         .filter(User.lname == lname)
@@ -43,23 +67,26 @@ def create():
         .one_or_none()
     )
 
-    # Can we insert this person?
+    # Add the user only if the user doesnt exist   
     if existing_user is None:
 
-        # Create a person instance using the schema and the passed in person
+        # Create a user
         schema = UserSchema()
         new_person = schema.load(user, session=db.session)
 
-        # Add the person to the database
+        # Add the user to the database
         db.session.add(new_person)
         db.session.commit()
 
-        # Serialize and return the newly created person in the response
+        # Serialize and return the newly created user in the response
         data = schema.dump(new_person)
+
+        # Delete the password field from the data 
         del data['password']
+
         return data, 201
 
-    # Otherwise, nope, person exists already
+    # user exists already
     else:
         abort(
             409,
@@ -68,6 +95,35 @@ def create():
             ),
         )
 
+
+def get_users():
+    """
+    This function is used to get all the users by the admin.Only admin is allowed to view the all the users
+    :return: json list of all users
+    """
+    # Get the person requested
+    token_info = connexion.context['token_info']
+    
+    # Only the admin user with user id = 1 should be allowed to see all the users
+    if token_info['sub'] != "1":
+        abort(
+            403,
+            "Forbidden: Only the admin's are allowed to see all the users"
+        )
+    
+    #  Get all the users expect the admin user
+    users = User.query.order_by(db.desc(User.timestamp)).filter(User.id != "1").all()
+    
+    #  Return 404 if no users found
+    if users is None:
+        abort(
+            404,
+            "No users found"
+        )
+    
+    user_schema = UserSchema(many=True)
+    data = user_schema.dump(users)
+    return data
 
 def get_user(user_id):
     """
@@ -87,13 +143,11 @@ def get_user(user_id):
         )
     user = User.query.filter(User.id == user_id).outerjoin(Images).one_or_none()
 
-    # Did we find a person?
+    # user exists
     if user is not None:
-
         # Serialize the data for the response
         user_schema = UserSchema()
         data = user_schema.dump(user)
-        del data['password']
         return data
 
     # Otherwise, nope, didn't find that person

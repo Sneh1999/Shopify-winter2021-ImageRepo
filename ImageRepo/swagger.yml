@@ -81,6 +81,51 @@ paths:
                       description: email of the user
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+    get:
+      operationId: user.get_users
+      summary: Get users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: >-
+            List of all the users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    type: object
+                    properties:
+                      user_id:
+                        type: string
+                        description: Id of the user
+                      fname:
+                        type: string
+                        description: First name of the user
+                      lname:
+                        type: string
+                        description: Last name of the user
+                      email:
+                        type: string
+                        description: email of the user
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+    
   /users/{user_id}:
     get:
       security:
@@ -367,6 +412,8 @@ components:
       description: The specified resource was not found
     BadRequest:
       description: Illegal Inputs provided
+    Forbidden:
+      description: Forbidden User
     GeneralError:
       description: General Error
       content:
