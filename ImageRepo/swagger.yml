@@ -121,6 +121,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'    
         '5XX':
@@ -180,7 +182,102 @@ paths:
                       type: string
                       description: Creation/Update timestamp of the image
         '401':
-          $ref: '#/components/responses/UnauthorizedError'              
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+    put:
+      security:
+        - bearerAuth: []
+      operationId: user.put_user
+      summary: Ammend a user
+      description: Ammend a user
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: email of the user
+                fname:
+                  type: string
+                  description: first name of the user
+                lname:
+                  type: string
+                  description: last name of the user
+      responses:
+        '200':
+          description: >-
+            The images have been uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    description: email of the user
+                  fname:
+                    type: string
+                    description: first name of the user
+                  lname:
+                    type: string
+                    description: last name of the user
+                  
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+      
+    delete:
+      security:
+        - bearerAuth: []
+      operationId: user.delete_user
+      summary: Delete a user
+      description: Delete a user
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Successfully deleted a user
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+    
   /users/{user_id}/images:
     get:
       security:
@@ -218,7 +315,8 @@ paths:
                       type: string
                       description: Creation/Update timestamp of the image
         '401':
-          $ref: '#/components/responses/UnauthorizedError'              
+          $ref: '#/components/responses/UnauthorizedError' 
+    
     post:
       security:
         - bearerAuth: []

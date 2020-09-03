@@ -20,7 +20,7 @@ context = CryptContext(
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
 
-
+admin_user = 1
 
 def create():
     """
@@ -55,7 +55,7 @@ def create():
             400,
             "Bad Request: Please send valid user"
         )
-        
+
     # Create a hash for the password, to prevent direct storage of the password
     user["password"]= context.hash(password)
 
@@ -104,15 +104,15 @@ def get_users():
     # Get the person requested
     token_info = connexion.context['token_info']
     
-    # Only the admin user with user id = 1 should be allowed to see all the users
-    if token_info['sub'] != "1":
+    # Only the admin user should be allowed to see all the users
+    if token_info['sub'] != str(admin_user):
         abort(
             403,
             "Forbidden: Only the admin's are allowed to see all the users"
         )
     
     #  Get all the users expect the admin user
-    users = User.query.order_by(db.desc(User.timestamp)).filter(User.id != "1").all()
+    users = User.query.order_by(db.desc(User.timestamp)).all()
     
     #  Return 404 if no users found
     if users is None:
@@ -123,24 +123,33 @@ def get_users():
     
     user_schema = UserSchema(many=True)
     data = user_schema.dump(users)
-    return data
+    return data,200
 
 def get_user(user_id):
     """
-    This function responds to a request for /api/people/{person_id}
-    with one matching person from people
-
-    :param person_id:   Id of person to find
-    :return:            person matching id
+    This function gets the user with the given user_id
+    :param user_id:   Id of user to find
+    :return:           200 on successful , 404 if not found
     """
+
+    # Check if user_id is None or an empty string
+    if user_id == None or user_id == "":
+        abort(
+            400,
+            "Bad Request: Please send valid user_id"
+        )
+    
     # Get the person requested
     token_info = connexion.context['token_info']
    
-    if token_info['sub'] != str(user_id):
+    # Only the authorized user or the admin should be able to access the user details    
+    if token_info['sub'] != str(user_id) and token_info['sub'] != str(admin_user):
         abort(
-            401,
-            "Unauthorized"
+            403,
+            "Forbidden: The given user cannot access the user_id provided"
         )
+    
+    # Check for the user with  user_id
     user = User.query.filter(User.id == user_id).outerjoin(Images).one_or_none()
 
     # user exists
@@ -148,11 +157,130 @@ def get_user(user_id):
         # Serialize the data for the response
         user_schema = UserSchema()
         data = user_schema.dump(user)
-        return data
+        return data,200
 
-    # Otherwise, nope, didn't find that person
+    # user doesnt exist
     else:
         abort(
             404,
-            "Person not found for Id: {user_id}".format(user_id=user_id),
+            "User not found for Id: {user_id}".format(user_id=user_id),
         )
+
+
+def put_user(user_id):
+    """
+    This function ammends the user with user_id 
+    :param user_id:   Id of the user to be deleted
+    :return:          201 on successful update, 404 if not found
+    """
+    
+    if user_id == None or user_id == "":
+        abort(
+            400,
+            "Bad Request: Please send valid user_id"
+        )
+
+     # Get the token provided
+    token_info = connexion.context['token_info']
+
+    # The user should be able to delete his account as well as the admin should be able to delete the account 
+    if token_info['sub'] != str(user_id) and token_info['sub'] != str(admin_user):
+        abort(
+            403,
+            "Forbidden: The given user cannot ammend the user_id provided"
+        )
+    
+    # get the user from the request body
+    request_user = connexion.request.get_json()
+
+    if  request_user == None :
+        abort(
+            400,
+            "Bad Request: Please send valid user"
+        )
+
+    email = request_user.get("email")
+    fname = request_user.get("fname")
+    lname = request_user.get("lname")
+
+    # check if the properties of the user are not none or empty string
+    if email is None or email is "" or fname is None or fname is "" or lname is None or fname is "":
+        abort(
+            400,
+            "Bad Request: Please send valid user details"
+        )
+    
+    # search for the user with the given user_id
+    user = (
+        User.query.filter(User.id == user_id)
+        .one_or_none()
+    )
+
+    ammend_user =  (User.query.filter(User.email == email)
+                    .filter(User.fname == fname)
+                    .filter(User.lname == lname)
+                    .one_or_none()
+                    )
+    if ammend_user is not None:
+         abort(
+            409,
+            "Person {fname} {lname} exists already".format(
+                fname=fname, lname=lname
+            ),
+        )
+
+    # user exists
+    if user is not None :
+        schema = UserSchema()
+        update = schema.load(request_user,session=db.session)
+        update.id = user.id
+        db.session.merge(update)
+        db.session.commit()
+        data = schema.dump(user)
+        return data,201
+
+    # user not found
+    else:
+        abort(404, "User not found")   
+
+
+def delete_user(user_id):
+    """
+    This function deletes the user_id that is passed
+    :param user_id:   Id of the user to be deleted
+    :return:           204 on successful delete, 404 if not found
+    """
+
+    if user_id == None or user_id == "":
+        abort(
+            400,
+            "Bad Request: Please send valid user_id"
+        )
+
+    # Get the person requested
+    token_info = connexion.context['token_info']
+
+  # The user should be able to delete his account as well as the admin should be able to delete the account 
+    if (token_info['sub'] != str(user_id)) and token_info['sub'] != str(admin_user):
+        abort(
+            403,
+            "Forbidden: The given user cannot delete the user_id provided"
+        )
+
+    # search for the user with the given user_id
+    user = (
+        User.query.filter(User.id == user_id)
+        .one_or_none()
+    )
+
+    # user exists
+    if user is not None:
+        db.session.delete(user)
+        db.session.commit()
+        return make_response(
+            "User has been deleted deleted", 204
+        )
+
+    # user doesnt exist
+    else:
+        abort(404, "User not found")   
