@@ -384,68 +384,10 @@ paths:
           description: Unexpected error.
 
   /users/{user_id}/images/{image_id}:
-    # get:
-    #   security:
-    #     - bearerAuth: []
-    #   operationId: image.get_access
-    #   summary: Access of an image
-    #   parameters:
-    #     - name: user_id
-    #       in: path
-    #       description: 'Id of the user'
-    #       required: true
-    #       example: 1
-    #       schema:
-    #         type: integer
-    #     - name: image_id
-    #       in: path
-    #       description: 'Id of the user'
-    #       required: true
-    #       example: 1
-    #       schema:
-    #         type: integer
-    #     - in: query
-    #       name: email
-    #       description: email of the user
-    #       schema:
-    #         type: string
-    #   responses:
-    #       '200':
-    #         description: >-
-    #           The images have been uploaded
-    #         content:
-    #           application/json:
-    #             schema:
-    #               type: object
-    #               items:
-    #                 properties:
-    #                   user_id:
-    #                     type: string
-    #                     description: Id of the user
-    #                   image_id:
-    #                     type: string
-    #                     description: Id of the image
-    #                   permission_id:
-    #                     type: string
-    #                     description: Id of the permission
-    #                   timestamp:
-    #                         type: string
-    #                         description: Creation/Update timestamp of the permission
-    #       '404':
-    #         description: >-
-    #           The image and user could not be found
-    #         content:
-    #           application/json:
-    #             schema:
-    #               type: integer 
-    #       '401':
-    #         $ref: '#/components/responses/UnauthorizedError'
-      
-
-    post:
+    get:
       security:
         - bearerAuth: []
-      operationId: image.create_access
+      operationId: image.get_image
       summary: Access of an image
       parameters:
         - name: user_id
@@ -462,38 +404,20 @@ paths:
           example: 1
           schema:
             type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  description: email of the user
       responses:
         '200':
-          description: >-
-            The images have been uploaded
+          description: OK
           content:
-            application/json:
+            text/plain:
               schema:
-                type: integer
-        '404':
-          description: >-
-            The set of images cant be uploaded 
-          content:
-            application/json:
-              schema:
-                type: integer 
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
+                type: string
+                example: pong
     delete:
       security:
         - bearerAuth: []
       operationId: image.delete_image
-      summary: Delete an image
-      description: Delete an image
+      summary: Delete an image from the repo
+      description: Delete an image from the repo
       parameters:
         - name: image_id
           in: path
@@ -511,13 +435,84 @@ paths:
             type: integer
       responses:
         '204':
-          description: Successfully deleted an image
+          description: Successfully deleted access to an image
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  
-  
-
-# 1) Define the security scheme type (HTTP bearer)
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+          
+          
+  /users/{user_id}/images/{image_id}/access:
+    post:
+      security:
+        - bearerAuth: []
+      operationId: image.create_access
+      summary: To provide access of an image to a user for other user's image
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
+        - name: image_id
+          in: path
+          description: 'Id of the image'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: email of the user
+      responses:
+        '201':
+          description: >-
+            The user has been given access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the image
+                  image:
+                    type: string
+                    description: Image name stored 
+                  user:
+                    type: array
+                    description: Array of the users
+                    items:
+                      type: integer
+                  timestamp:
+                    type: string
+                    description: Creation/Update timestamp of the image
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+          
+   
 components:
   schemas:
     GeneralError:
