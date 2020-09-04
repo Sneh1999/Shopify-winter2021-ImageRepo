@@ -302,20 +302,30 @@ paths:
                 type: array
                 items:
                   properties:
-                    image_id:
-                      type: string
-                      description: Id of the image
-                    user_id:
+                    id:
                       type: string
                       description: Id of the image
                     image:
                       type: string
                       description: url of the image
+                    user:
+                      type: array
+                      items:
+                        type: integer
+                        description: Users associated with the given image
                     timestamp:
                       type: string
                       description: Creation/Update timestamp of the image
         '401':
-          $ref: '#/components/responses/UnauthorizedError' 
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
     
     post:
       security:
@@ -340,22 +350,38 @@ paths:
                     type: string
                     format: binary
       responses:
-        '200':
+        '201':
           description: >-
             The images have been uploaded
           content:
             application/json:
               schema:
-                type: integer
-        '404':
-          description: >-
-            The set of images cant be uploaded 
-          content:
-            application/json:
-              schema:
-                type: integer 
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the image
+                  image:
+                    type: string
+                    description: Image name stored in teh database
+                  user:
+                    type: array
+                    description: Array of the users
+                    items:
+                      type: integer
+                  timestamp:
+                    type: string
+                    description: Creation/Update timestamp of the image
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
 
   /users/{user_id}/images/{image_id}:
     # get:

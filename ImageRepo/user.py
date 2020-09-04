@@ -44,13 +44,7 @@ def create():
     password = user.get("password")
 
     # Check if the data within the user is not None
-    if fname is None or lname is None or email is None or password is None:
-        abort(
-            400,
-            "Bad Request: Please send valid user"
-        )
-
-    if fname is "" or lname is "" or email is "" or password is "":
+    if fname is None or lname is None or email is None or password is None or fname is "" or lname is "" or email is "" or password is "":
         abort(
             400,
             "Bad Request: Please send valid user"

@@ -4,9 +4,12 @@ from marshmallow import fields
 from marshmallow_sqlalchemy import ModelSchema
 
 
-permissions = db.Table('permissions',
-                            db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-                            db.Column('image_id', db.Integer, db.ForeignKey('images.id')))
+class Permissions(db.Model):
+    __tablename__ = "permissions"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+    image_id = db.Column('image_id', db.Integer, db.ForeignKey('images.id'))
+
 
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +48,7 @@ class ImageSchema(ModelSchema):
     class Meta:
         model = Images
         sqla_session = db.session
+
 
 # TODO : convert and run on from http to https
 # TODO : add  cascade delete 
