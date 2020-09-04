@@ -8,14 +8,14 @@ from certificate import config
 import connexion
 from passlib.context import CryptContext
 import hashlib
-
+from sqlalchemy import and_
 
 #  TODO: check for the conflict error and add it to swagger as well
 # TODO: ensure secure uploading ,downloading and deleting of teh image
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
-JWT_LIFETIME_SECONDS = 600
+JWT_LIFETIME_SECONDS = 31622400
 JWT_ALGORITHM = 'HS256'
 
 # create CryptContext object
@@ -282,6 +282,7 @@ def delete_image(user_id,image_id):
             " Not Found: No user found with the permission for the given image id"
         )
 
+# TODO: indent the file
 
 def create_access(user_id,image_id):
     """
@@ -289,117 +290,68 @@ def create_access(user_id,image_id):
     email provided in the request body to the image of the user with the given user_id
     :param user_id:   Id of user to find
     :param image_id:   Id of image to find
-    :return:        201, image object
+    :return:        201, image to which the access was given to user with the email in request body
     """
+    # check if the user_id and the image_is provided is not null or empty string
+    if user_id is None or user_id == "" or image_id is None or image_id == "":
+        abort(
+            400,
+            "Bad Request: Please send valid user and image Id"
+        )
+
     token_info = connexion.context['token_info']
    
   # Only the authorized user or the admin should be able to access the user details    
     if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
         abort(
             403,
-            "Forbidden: The given user cannot access the user_id provided"
+            "Forbidden: The given user doesnt have an access"
         )
 
-    # get the email from teh request body
+    # get the email from the request body
     email = connexion.request.get_json()
-    user = User.query.filter(User.id == user_id).one_or_none()
+
+    # search for the user with the given email address
     email_user = User.query.filter(User.email == email["email"]).one_or_none()
-    image = Images.query.filter(Images.id == image_id).one_or_none()
-    if user and email_user and image: 
-        file_path = {
-            "image": image.image
-        }
-        schema = ImageSchema()
-        new_image_schema = schema.load(file_path, session=db.session)
-        email_user.images.append(new_image_schema)
-        db.session.commit()
-
-            # Serialize and return the newly created person in the response
-        data = schema.dump(email_user)
-
-        return 0, 201
-    else:
+    
+    #  Search for the image associated with the  associated user
+    existing_permission = (db.session.query(
+            Permissions
+        ).filter(
+            User.id == Permissions.user_id,
+        ).filter(
+            Images.id == Permissions.image_id,
+        ).filter(
+            User.email == email["email"],
+        ).filter(
+            Images.id == image_id
+        )
+        .one_or_none()
+    )
+    # This means the persmission already exists
+    if existing_permission is not None:
         abort(
             409,
-            "Not working fine"
+            "Conflict: the permission already exists"
+        )
+    if email_user is None:
+        abort(
+            404,
+            " Not Found: User with the given email is not found"
         )
 
-# def create_access(user_id,image_id):
-#     """
-#     This function created an access for a person with 
-#     email provided in the request body to the image of the user with the given user_id
-#     :param user_id:   Id of user to find
-#     :param image_id:   Id of image to find
-#     :return:        201, image to which the access was given to
-#     """
-#     if user_id is None or user_id == "" or image_id is None or image_id == "":
-#         abort(
-#             400,
-#             "Bad Request: Please send valid user and image Id"
-#         )
-
-#     token_info = connexion.context['token_info']
-   
-#   # Only the authorized user or the admin should be able to access the user details    
-#     if token_info['sub'] != str(user_id) and token_info['sub'] != str(admin_user):
-#         abort(
-#             403,
-#             "Forbidden: The given user doesnt have an access"
-#         )
-
-#     # get the email from teh request body
-#     email = connexion.request.get_json()
-
-#      #  Search for the image associated with the  associated user
-#     image = ( db.session.query(
-#             Images
-#         ).filter(
-#             User.id == Permissions.user_id,
-#         ).filter(
-#             Images.id == Permissions.image_id,
-#         ).filter(
-#             User.id == user_id,
-#         ).filter(
-#             Images.id == image_id
-#         ).one_or_none()
-#         )
-
-#     if image is None:
-#         abort(
-#             404,
-#             " Not Found: Image associated with the given user and image id is not found"
-#         )
-#     # serach for the user with the given email address
-#     email_user = User.query.filter(User.email == email["email"]).one_or_none()
-
-#     if email_user is None:
-#         abort(
-#             404,
-#             " Not Found: User with the given email is not found"
-#         )
-
-#     # check if the permission already exists
-#     permission = Permissions.query.filter(Permissions.image_id == image_id).filter(Permissions.user_id == email_user.id).one_or_none()
-
-#     if permission is not None:
-#         abort(
-#             409,
-#             "Conflict: the permission already exists"
-#         )
+    # get the image which needs to be added to  the email_user
+    image = Images.query.filter(Images.id == image_id).one_or_none()
     
-#     file_path =  {
-#         "image": image.image
-#     }
-
-#     schema = ImageSchema()
-#     new_image_schema = schema.load(file_path, session=db.session)
-#     email_user.images.append(new_image_schema)
-#     db.session.commit()
-#     # Serialize and return the newly created person in the response
-#     new_image = Images.query.filter(Images.id == image_id).one_or_none()
-#     data = schema.dump(new_image)
-
-#     return data, 201
+    schema = ImageSchema()
+    # append the image to the user
+    email_user.images.append(image)
+    db.session.merge(email_user)
+    db.session.commit()
+    # Serialize and return the newly created image in the response
+    new_image = Images.query.filter(Images.id == image_id).one_or_none()
+    data = schema.dump(new_image)
+    return data, 201
 
 
 def get_size(fobj):

@@ -399,7 +399,7 @@ paths:
             type: integer
         - name: image_id
           in: path
-          description: 'Id of the user'
+          description: 'Id of the image'
           required: true
           example: 1
           schema:
@@ -419,16 +419,16 @@ paths:
       summary: Delete an image from the repo
       description: Delete an image from the repo
       parameters:
-        - name: image_id
+        - name: user_id
           in: path
-          description: 'Id of the image'
+          description: 'Id of the user'
           required: true
           example: 1
           schema:
             type: integer
-        - name: user_id
+        - name: image_id
           in: path
-          description: 'Id of the user'
+          description: 'Id of the image'
           required: true
           example: 1
           schema:
@@ -509,6 +509,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'    
+        '409':
+          $ref: '#/components/responses/Conflict' 
         '5XX':
           description: Unexpected error.
           
@@ -533,6 +535,8 @@ components:
       description: Illegal Inputs provided
     Forbidden:
       description: Forbidden User
+    Conflict:
+      description: Conflict
     GeneralError:
       description: General Error
       content:
