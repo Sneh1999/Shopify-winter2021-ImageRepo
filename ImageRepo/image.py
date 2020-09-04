@@ -12,6 +12,9 @@ from sqlalchemy import and_
 
 #  TODO: check for the conflict error and add it to swagger as well
 # TODO: ensure secure uploading ,downloading and deleting of teh image
+# TODO: move th access function to a new file
+# TODO: check the swagger file to see that the correct implementation of the api is there
+# TODO: check admin has correct permissions
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
@@ -25,8 +28,6 @@ context = CryptContext(
         pbkdf2_sha256__default_rounds=50000
 )
 
-
-# TODO: password field still returning
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
@@ -269,12 +270,17 @@ def delete_image(user_id,image_id):
     )
 
     if existing_image is not None:
-        #  TODO: check if the given image is also associated with another user
-        storage.delete(existing_image.image)
-        db.session.delete(existing_image)
-        db.session.commit()
+        permissions = Permissions.query.filter(Permissions.image_id == image_id).all()
+        if len(permissions) > 1:
+            delete_permission = Permissions.query.filter(and_(Permissions.image_id == image_id,Permissions.user_id == user_id)).one_or_none()
+            db.session.delete(delete_permission)
+            db.session.commit()         
+        else:
+            db.session.delete(existing_image)
+            db.session.commit()
+            storage.delete(existing_image.image)
         return make_response(
-            "Image deleted", 200
+            "Image deleted", 204
         )
     else:
           abort(

@@ -513,7 +513,6 @@ paths:
           $ref: '#/components/responses/Conflict' 
         '5XX':
           description: Unexpected error.
-          
    
 components:
   schemas:

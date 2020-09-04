@@ -10,6 +10,7 @@ import connexion
 from passlib.context import CryptContext
 
 
+# TODO: check that admin has access to all teh users and teh functions
 # create CryptContext object
 context = CryptContext(
         schemes=["pbkdf2_sha256"],
@@ -117,6 +118,9 @@ def get_users():
     
     user_schema = UserSchema(many=True)
     data = user_schema.dump(users)
+    for d in data:
+        del(d["password"])
+
     return data,200
 
 def get_user(user_id):
@@ -144,13 +148,14 @@ def get_user(user_id):
         )
     
     # Check for the user with  user_id
-    user = User.query.filter(User.id == user_id).outerjoin(Images).one_or_none()
+    user = User.query.filter(User.id == user_id).one_or_none()
 
     # user exists
     if user is not None:
         # Serialize the data for the response
         user_schema = UserSchema()
         data = user_schema.dump(user)
+        del(data["password"])
         return data,200
 
     # user doesnt exist
@@ -231,6 +236,7 @@ def put_user(user_id):
         db.session.merge(update)
         db.session.commit()
         data = schema.dump(user)
+        del(data["password"])
         return data,201
 
     # user not found

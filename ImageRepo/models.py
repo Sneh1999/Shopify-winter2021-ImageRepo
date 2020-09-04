@@ -52,12 +52,3 @@ class ImageSchema(ModelSchema):
 
 
 
-# TODO : convert and run on from http to https
-# TODO : add  cascade delete 
-# TODO : check if whatever thats returned from openapi3 is valid
-# TODO:  check that only valid files get added
-# TODO: Ensure you  keep the secret  keys somewhere
-# TODO: Add definitions
-
-
-
