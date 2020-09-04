@@ -331,7 +331,7 @@ paths:
       security:
         - bearerAuth: []
       operationId: image.upload
-      summary: Uploading a list  of images
+      summary: Uploading an image
       parameters:
         - name: user_id
           in: path
@@ -352,7 +352,7 @@ paths:
       responses:
         '201':
           description: >-
-            The images have been uploaded
+            The image has been uploaded
           content:
             application/json:
               schema:
@@ -411,7 +411,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: pong
+                example: "https://someurl.com"
     delete:
       security:
         - bearerAuth: []
@@ -546,3 +546,5 @@ components:
       scheme: bearer
       bearerFormat: JWT    # optional, arbitrary value for documentation purposes
       x-bearerInfoFunc: auth.decode_token
+
+
