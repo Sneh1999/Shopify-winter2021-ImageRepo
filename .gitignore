@@ -3,15 +3,4 @@
 .vscode/
  ImageRepo/.DS_Store
 ImageRepo/__pycache__/
-ImageRepo/certificate.py
-ImageRepo/key.json
-ImageRepo/mypython/
-ImageRepo/rootCA.key
-ImageRepo/rootCA.pem
-ImageRepo/rootCA.srl
-ImageRepo/server.crt
-ImageRepo/server.csr
-ImageRepo/server.csr.cnf
-ImageRepo/server.key
-ImageRepo/v3.ext
 .env

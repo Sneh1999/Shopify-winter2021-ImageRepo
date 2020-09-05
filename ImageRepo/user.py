@@ -44,7 +44,7 @@ def create():
             "Bad Request: Please send valid user"
         )
 
-    # Get the user details from teh request body
+    # Get the user details from the request body
     fname = user.get("fname")
     lname = user.get("lname")  
     email = user.get("email")
@@ -225,11 +225,13 @@ def put_user(user_id):
         .one_or_none()
     )
 
+    # Check if a user with the given details already exists
     ammend_user = (User.query.filter(User.email == email)
                    .filter(User.fname == fname)
                    .filter(User.lname == lname)
                    .one_or_none()
                    )
+                   
     if ammend_user is not None:
         abort(
             409,
