@@ -12,4 +12,5 @@ marshmallow-sqlalchemy
 marshmallow
 openapi3
 pyrebase
+python-dotenv
 passlib

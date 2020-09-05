@@ -14,7 +14,7 @@ JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
 JWT_LIFETIME_SECONDS = 31622400
 JWT_ALGORITHM = 'HS256'
-ADMIN_USER = 1
+ADMIN_USER = '1'
 
 # create CryptContext object
 context = CryptContext(
@@ -101,7 +101,7 @@ def get_users():
     token_info = connexion.context['token_info']
     
     # Only the admin user should be allowed to see all the users
-    if token_info['sub'] != str(ADMIN_USER):
+    if token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: Only the admin's are allowed to see all the users"
@@ -142,7 +142,7 @@ def get_user(user_id):
     token_info = connexion.context['token_info']
    
     # Only the authorized user or the admin should be able to access the user details    
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user cannot access the user_id provided"
@@ -184,7 +184,7 @@ def put_user(user_id):
     token_info = connexion.context['token_info']
 
     # The user should be able to delete his account as well as the admin should be able to delete the account 
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user cannot ammend the user_id provided"
@@ -262,7 +262,7 @@ def delete_user(user_id):
     token_info = connexion.context['token_info']
 
   # The user should be able to delete his account as well as the admin should be able to delete the account 
-    if (token_info['sub'] != str(user_id)) and token_info['sub'] != str(ADMIN_USER):
+    if (token_info['sub'] != str(user_id)) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user cannot delete the user_id provided"

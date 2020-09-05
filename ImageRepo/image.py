@@ -20,7 +20,7 @@ JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
 JWT_LIFETIME_SECONDS = 31622400
 JWT_ALGORITHM = 'HS256'
-ADMIN_USER = 1
+ADMIN_USER = '1'
 ADMIN_EMAIL = 'admin@gmail.com'
 ADMIN_PASSWORD = 'adminuser'
 MAX_IMAGE_SIZE = 10*1024*1024 
@@ -63,7 +63,7 @@ def upload(user_id):
 
   
     #  Check the token belongs to the authorized user 
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER) :
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER :
         abort(
             403,
             "Forbidden: The given user doesnt have access to uoload an image"
@@ -132,7 +132,7 @@ def read_images(user_id):
     token_info = connexion.context['token_info']
    
      #  Check the token belongs to the authorized user 
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER) :
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER :
         abort(
             403,
             "Forbidden: The given user doesnt have access to read the image"
@@ -189,7 +189,7 @@ def get_image(user_id,image_id):
     token_info = connexion.context['token_info']
     
     # Check if the token belongs to authorized user
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have access to read the images"
@@ -239,7 +239,7 @@ def delete_image(user_id,image_id):
     token_info = connexion.context['token_info']
     
     # Check if the token belongs to authorized user
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have access to read the images"
@@ -303,7 +303,7 @@ def create_access(user_id,image_id):
     token_info = connexion.context['token_info']
    
   # Only the authorized user or the admin should be able to access the user details    
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have an access"
