@@ -14,6 +14,7 @@ class Permissions(db.Model):
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.String(300), nullable=False)
+    download_token = db.Column(db.String(300), nullable=False)
     timestamp = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )

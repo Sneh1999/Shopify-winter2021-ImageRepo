@@ -10,11 +10,13 @@ from passlib.context import CryptContext
 import hashlib
 from sqlalchemy import and_
 
-#  TODO: check for the conflict error and add it to swagger as well
+# TODO: check for the conflict error and add it to swagger as well
 # TODO: ensure secure uploading ,downloading and deleting of teh image
 # TODO: move th access function to a new file
 # TODO: check the swagger file to see that the correct implementation of the api is there
 # TODO: check admin has correct permissions
+# TODO: check that if there is only permission still delete works
+# TODO: dont let firebase login multiple times
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
@@ -32,6 +34,9 @@ context = CryptContext(
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
 
+
+
+
 supported_types = ['image/bmp','image/dds','image/exif','image/gif','image/jpg','image/jpeg','image/jp2','image/jpx','image/pcx','image/png','image/pnm','image/ras','image/tga','image/tif','image/tiff','image/xbm','image/xpm']
 
 ADMIN_USER = 1
@@ -42,6 +47,8 @@ ADMIN_PASSWORD = 'adminuser'
 
 MAX_IMAGE_SIZE = 10*1024*1024 
 MIN_IMAGE_SIZE = 2*1024
+
+download_tokens = None
 
 def upload(user_id):
     """
@@ -82,9 +89,7 @@ def upload(user_id):
     timestamp = int(time.time())
     path  = path + str(timestamp)
 
-    file_path = {
-        "image": path
-    }
+  
     
     # check the user with the given user_id and to avoid conflicts
     user = User.query.filter(User.id == user_id).one_or_none()
@@ -94,18 +99,22 @@ def upload(user_id):
         abort(
             404, f"Person not found for Id: {user_id}"
             )
-    
-    # create a new image object
-    new_image = Images()
-    new_image.image = file_path
+
+
     schema = ImageSchema()
     image = file
     image.name = path
     
     # TODO: add error checking for firebase here
     # Store the image in firebase 
-    storage.child(path).put(image)
-  
+    fireb_user = firebase.auth().sign_in_with_email_and_password(ADMIN_EMAIL,ADMIN_PASSWORD)
+    tok = fireb_user['idToken']
+    result = storage.child(path).put(image,tok)
+    download_token = result['downloadTokens']
+    file_path = {
+        "image": path,
+        "download_token" : download_token
+    }
     new_image_schema = schema.load(file_path, session=db.session)
     user.images.append(new_image_schema)
     db.session.commit()
@@ -222,11 +231,8 @@ def get_image(user_id,image_id):
         )
 
     # TODO : add error checking for firebase here
-    user = firebase.auth().sign_in_with_email_and_password(ADMIN_EMAIL,ADMIN_PASSWORD)
-
-    tok = user['idToken']
-
-    url = storage.child(existing_image.image).get_url(tok)
+  
+    url = storage.child(existing_image.image).get_url(existing_image.download_token)
 
     return  url,200
    
@@ -268,14 +274,17 @@ def delete_image(user_id,image_id):
         )
         .one_or_none()
     )
-
+    # if current user has the permission for the given image
     if existing_image is not None:
+        # check all the permissions realted to this image
         permissions = Permissions.query.filter(Permissions.image_id == image_id).all()
+        # if more than one user has permission to this image then dont delete it from firebase and database
         if len(permissions) > 1:
             delete_permission = Permissions.query.filter(and_(Permissions.image_id == image_id,Permissions.user_id == user_id)).one_or_none()
             db.session.delete(delete_permission)
             db.session.commit()         
         else:
+            # delete the image from the firebase and database
             db.session.delete(existing_image)
             db.session.commit()
             storage.delete(existing_image.image)
@@ -361,6 +370,9 @@ def create_access(user_id,image_id):
 
 
 def get_size(fobj):
+    """
+    This function is used to determine the size of a file
+    """
     if fobj.content_length:
         return fobj.content_length
 
