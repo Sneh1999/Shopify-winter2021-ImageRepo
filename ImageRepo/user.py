@@ -1,6 +1,6 @@
 from flask import make_response, abort
 from config import db
-from models import Images,ImageSchema,User,UserSchema
+from models import Images, ImageSchema, User, UserSchema
 from pathlib import Path
 import pyrebase
 import os
@@ -18,19 +18,21 @@ ADMIN_USER = os.environ.get('ADMIN_USER')
 
 # create CryptContext object
 context = CryptContext(
-        schemes=["pbkdf2_sha256"],
-        default="pbkdf2_sha256",
-        pbkdf2_sha256__default_rounds=50000
+    schemes=["pbkdf2_sha256"],
+    default="pbkdf2_sha256",
+    pbkdf2_sha256__default_rounds=50000
 )
 
+# Initialize Firebase
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
+
 
 def create():
     """
     This function creates a new user in the user structure
 
-    :param user:  person to create in people structure
+    :param user:  user object
     :return:        201 on success, 406 on person exists
     """
     # Get the user from the request body
@@ -41,29 +43,35 @@ def create():
             400,
             "Bad Request: Please send valid user"
         )
-    
+
+    # Get the user details from teh request body
     fname = user.get("fname")
-    lname = user.get("lname")
+    lname = user.get("lname")  
     email = user.get("email")
     password = user.get("password")
 
     # Check if the data within the user is not None
-    if fname is None or lname is None or email is None or password is None or fname is "" or lname is "" or email is "" or password is "":
+    if (
+        fname is None or lname is None or 
+        email is None or password is None or 
+        fname is "" or lname is "" or email is "" 
+        or password is ""):
         abort(
             400,
             "Bad Request: Please send valid user"
         )
 
     # Create a hash for the password, to prevent direct storage of the password
-    user["password"]= context.hash(password)
+    user["password"] = context.hash(password)
 
     # Check if there is an existing user
     existing_user = (
-        User.query.filter(and_(User.fname == fname,User.lname == lname,User.email == email))
+        User.query.filter(
+            and_(User.fname == fname, User.lname == lname, User.email == email))
         .one_or_none()
     )
 
-    # Add the user only if the user doesnt exist   
+    # Add the user only if the user doesnt exist
     if existing_user is None:
 
         # Create a user
@@ -77,7 +85,7 @@ def create():
         # Serialize and return the newly created user in the response
         data = schema.dump(new_person)
 
-        # Delete the password field from the data 
+        # Delete the password field from the data
         del data['password']
 
         return data, 201
@@ -99,30 +107,31 @@ def get_users():
     """
     # Get the person requested
     token_info = connexion.context['token_info']
-    
+
     # Only the admin user should be allowed to see all the users
     if token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: Only the admin's are allowed to see all the users"
         )
-    
+
     #  Get all the users expect the admin user
     users = User.query.order_by(db.desc(User.timestamp)).all()
-    
+
     #  Return 404 if no users found
     if users is None:
         abort(
             404,
             "No users found"
         )
-    
+
     user_schema = UserSchema(many=True)
     data = user_schema.dump(users)
     for d in data:
         del(d["password"])
 
-    return data,200
+    return data, 200
+
 
 def get_user(user_id):
     """
@@ -137,17 +146,17 @@ def get_user(user_id):
             400,
             "Bad Request: Please send valid user_id"
         )
-    
+
     # Get the person requested
     token_info = connexion.context['token_info']
-   
-    # Only the authorized user or the admin should be able to access the user details    
+
+    # Only the authorized user or the admin should be able to access the user details
     if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user cannot access the user_id provided"
         )
-    
+
     # Check for the user with  user_id
     user = User.query.filter(User.id == user_id).one_or_none()
 
@@ -157,7 +166,7 @@ def get_user(user_id):
         user_schema = UserSchema()
         data = user_schema.dump(user)
         del(data["password"])
-        return data,200
+        return data, 200
 
     # user doesnt exist
     else:
@@ -173,7 +182,7 @@ def put_user(user_id):
     :param user_id:   Id of the user to be deleted
     :return:          201 on successful update, 404 if not found
     """
-    
+
     if user_id == None or user_id == "":
         abort(
             400,
@@ -183,17 +192,17 @@ def put_user(user_id):
      # Get the token provided
     token_info = connexion.context['token_info']
 
-    # The user should be able to delete his account as well as the admin should be able to delete the account 
+    # The user should be able to delete his account as well as the admin should be able to delete the account
     if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user cannot ammend the user_id provided"
         )
-    
+
     # get the user from the request body
     request_user = connexion.request.get_json()
 
-    if  request_user == None :
+    if request_user == None:
         abort(
             400,
             "Bad Request: Please send valid user"
@@ -209,20 +218,20 @@ def put_user(user_id):
             400,
             "Bad Request: Please send valid user details"
         )
-    
+
     # search for the user with the given user_id
     user = (
         User.query.filter(User.id == user_id)
         .one_or_none()
     )
 
-    ammend_user =  (User.query.filter(User.email == email)
-                    .filter(User.fname == fname)
-                    .filter(User.lname == lname)
-                    .one_or_none()
-                    )
+    ammend_user = (User.query.filter(User.email == email)
+                   .filter(User.fname == fname)
+                   .filter(User.lname == lname)
+                   .one_or_none()
+                   )
     if ammend_user is not None:
-         abort(
+        abort(
             409,
             "Person {fname} {lname} exists already".format(
                 fname=fname, lname=lname
@@ -230,19 +239,19 @@ def put_user(user_id):
         )
 
     # user exists
-    if user is not None :
+    if user is not None:
         schema = UserSchema()
-        update = schema.load(request_user,session=db.session)
+        update = schema.load(request_user, session=db.session)
         update.id = user.id
         db.session.merge(update)
         db.session.commit()
         data = schema.dump(user)
         del(data["password"])
-        return data,201
+        return data, 201
 
     # user not found
     else:
-        abort(404, "User not found")   
+        abort(404, "User not found")
 
 
 def delete_user(user_id):
@@ -261,7 +270,7 @@ def delete_user(user_id):
     # Get the person requested
     token_info = connexion.context['token_info']
 
-  # The user should be able to delete his account as well as the admin should be able to delete the account 
+  # The user should be able to delete his account as well as the admin should be able to delete the account
     if (token_info['sub'] != str(user_id)) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
@@ -284,4 +293,4 @@ def delete_user(user_id):
 
     # user doesnt exist
     else:
-        abort(404, "User not found")   
+        abort(404, "User not found")
