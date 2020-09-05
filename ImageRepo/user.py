@@ -6,11 +6,16 @@ import pyrebase
 import os
 from certificate import config
 import connexion
-
 from passlib.context import CryptContext
+from sqlalchemy import and_
 
+# TODO: check that admin has access to all teh users and teh
+JWT_ISSUER = 'com.zalando.connexion'
+JWT_SECRET = 'change_this'
+JWT_LIFETIME_SECONDS = 31622400
+JWT_ALGORITHM = 'HS256'
+ADMIN_USER = 1
 
-# TODO: check that admin has access to all teh users and teh functions
 # create CryptContext object
 context = CryptContext(
         schemes=["pbkdf2_sha256"],
@@ -20,8 +25,6 @@ context = CryptContext(
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
-
-admin_user = 1
 
 def create():
     """
@@ -56,9 +59,7 @@ def create():
 
     # Check if there is an existing user
     existing_user = (
-        User.query.filter(User.fname == fname)
-        .filter(User.lname == lname)
-        .filter(User.email == email)
+        User.query.filter(and_(User.fname == fname,User.lname == lname,User.email == email))
         .one_or_none()
     )
 
@@ -100,7 +101,7 @@ def get_users():
     token_info = connexion.context['token_info']
     
     # Only the admin user should be allowed to see all the users
-    if token_info['sub'] != str(admin_user):
+    if token_info['sub'] != str(ADMIN_USER):
         abort(
             403,
             "Forbidden: Only the admin's are allowed to see all the users"
@@ -141,7 +142,7 @@ def get_user(user_id):
     token_info = connexion.context['token_info']
    
     # Only the authorized user or the admin should be able to access the user details    
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(admin_user):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
         abort(
             403,
             "Forbidden: The given user cannot access the user_id provided"
@@ -183,7 +184,7 @@ def put_user(user_id):
     token_info = connexion.context['token_info']
 
     # The user should be able to delete his account as well as the admin should be able to delete the account 
-    if token_info['sub'] != str(user_id) and token_info['sub'] != str(admin_user):
+    if token_info['sub'] != str(user_id) and token_info['sub'] != str(ADMIN_USER):
         abort(
             403,
             "Forbidden: The given user cannot ammend the user_id provided"
@@ -261,7 +262,7 @@ def delete_user(user_id):
     token_info = connexion.context['token_info']
 
   # The user should be able to delete his account as well as the admin should be able to delete the account 
-    if (token_info['sub'] != str(user_id)) and token_info['sub'] != str(admin_user):
+    if (token_info['sub'] != str(user_id)) and token_info['sub'] != str(ADMIN_USER):
         abort(
             403,
             "Forbidden: The given user cannot delete the user_id provided"

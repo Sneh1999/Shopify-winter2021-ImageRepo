@@ -9,19 +9,22 @@ import connexion
 from passlib.context import CryptContext
 import hashlib
 from sqlalchemy import and_
+from os import environ 
 
-# TODO: check for the conflict error and add it to swagger as well
-# TODO: ensure secure uploading ,downloading and deleting of teh image
-# TODO: move th access function to a new file
-# TODO: check the swagger file to see that the correct implementation of the api is there
-# TODO: check admin has correct permissions
-# TODO: check that if there is only permission still delete works
 # TODO: dont let firebase login multiple times
+# TODO : error checking for firebase
+# TODO: indent the file
+# TODO: check all the functions and clean up teh files
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
 JWT_LIFETIME_SECONDS = 31622400
 JWT_ALGORITHM = 'HS256'
+ADMIN_USER = 1
+ADMIN_EMAIL = 'admin@gmail.com'
+ADMIN_PASSWORD = 'adminuser'
+MAX_IMAGE_SIZE = 10*1024*1024 
+MIN_IMAGE_SIZE = 2*1024
 
 # create CryptContext object
 context = CryptContext(
@@ -29,26 +32,10 @@ context = CryptContext(
         default="pbkdf2_sha256",
         pbkdf2_sha256__default_rounds=50000
 )
-
-
+supported_types = ['image/bmp','image/dds','image/exif','image/gif','image/jpg','image/jpeg','image/jp2','image/jpx','image/pcx','image/png','image/pnm','image/ras','image/tga','image/tif','image/tiff','image/xbm','image/xpm']
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
 
-
-
-
-supported_types = ['image/bmp','image/dds','image/exif','image/gif','image/jpg','image/jpeg','image/jp2','image/jpx','image/pcx','image/png','image/pnm','image/ras','image/tga','image/tif','image/tiff','image/xbm','image/xpm']
-
-ADMIN_USER = 1
-
-
-ADMIN_EMAIL = 'admin@gmail.com'
-ADMIN_PASSWORD = 'adminuser'
-
-MAX_IMAGE_SIZE = 10*1024*1024 
-MIN_IMAGE_SIZE = 2*1024
-
-download_tokens = None
 
 def upload(user_id):
     """
@@ -105,7 +92,6 @@ def upload(user_id):
     image = file
     image.name = path
     
-    # TODO: add error checking for firebase here
     # Store the image in firebase 
     fireb_user = firebase.auth().sign_in_with_email_and_password(ADMIN_EMAIL,ADMIN_PASSWORD)
     tok = fireb_user['idToken']
@@ -226,11 +212,9 @@ def get_image(user_id,image_id):
     # Check if the user is associated with the given image
     if existing_image is None:
          abort(
-            404,
-            " Not Found: No user found with the permission for the given  image id"
+            403,
+            "Forbidden: User doesnt have permission for the given image"
         )
-
-    # TODO : add error checking for firebase here
   
     url = storage.child(existing_image.image).get_url(existing_image.download_token)
 
@@ -297,7 +281,7 @@ def delete_image(user_id,image_id):
             " Not Found: No user found with the permission for the given image id"
         )
 
-# TODO: indent the file
+
 
 def create_access(user_id,image_id):
     """
@@ -307,11 +291,13 @@ def create_access(user_id,image_id):
     :param image_id:   Id of image to find
     :return:        201, image to which the access was given to user with the email in request body
     """
-    # check if the user_id and the image_is provided is not null or empty string
-    if user_id is None or user_id == "" or image_id is None or image_id == "":
+     # get the email from the request body
+    email = connexion.request.get_json()
+    # check if the user_id and the image_is provided is not null or empty string and email is not empty string or null
+    if user_id is None or user_id == "" or image_id is None or image_id == "" or email is None or email is {} or email["email"] is None or email["email"] is "":
         abort(
             400,
-            "Bad Request: Please send valid user and image Id"
+            "Bad Request: Please send valid user Id, image Id and email"
         )
 
     token_info = connexion.context['token_info']
@@ -323,12 +309,25 @@ def create_access(user_id,image_id):
             "Forbidden: The given user doesnt have an access"
         )
 
-    # get the email from the request body
-    email = connexion.request.get_json()
+
+    check_permission = Permissions.query.filter(and_(Permissions.user_id ==  user_id, Permissions.image_id == image_id)).one_or_none()
+
+    if check_permission is None:
+        abort(
+            403,
+            "Forbidden: The given user doesnt have an access to the given image"
+        )
+    
 
     # search for the user with the given email address
     email_user = User.query.filter(User.email == email["email"]).one_or_none()
-    
+
+    if email_user is None:
+        abort(
+            404,
+            " Not Found: User with the given email is not found"
+        )
+
     #  Search for the image associated with the  associated user
     existing_permission = (db.session.query(
             Permissions
@@ -349,11 +348,7 @@ def create_access(user_id,image_id):
             409,
             "Conflict: the permission already exists"
         )
-    if email_user is None:
-        abort(
-            404,
-            " Not Found: User with the given email is not found"
-        )
+  
 
     # get the image which needs to be added to  the email_user
     image = Images.query.filter(Images.id == image_id).one_or_none()

@@ -15,3 +15,4 @@ ImageRepo/server.csr
 ImageRepo/server.csr.cnf
 ImageRepo/server.key
 ImageRepo/v3.ext
+.env

@@ -6,11 +6,14 @@ from werkzeug.exceptions import Unauthorized
 from jose import JWTError, jwt
 from models import User
 from passlib.context import CryptContext
+from os import environ 
+
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
 JWT_LIFETIME_SECONDS = 31622400
 JWT_ALGORITHM = 'HS256'
+
 
 # create CryptContext object
 context = CryptContext(
@@ -60,7 +63,7 @@ def generate_token():
         if verify_password is False:
             abort(
                 401,
-                "Unauthorized: Please verufy your password"
+                "Unauthorized: Please verify your password"
             )
         
         timestamp = int(time.time())
