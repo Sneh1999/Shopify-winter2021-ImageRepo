@@ -1,6 +1,6 @@
-from flask import make_response, abort,request
+from flask import make_response, abort, request
 from config import db
-from models import Images,ImageSchema,User,UserSchema,Permissions
+from models import Images, ImageSchema, User, UserSchema, Permissions
 import sys
 import pyrebase
 import time
@@ -9,30 +9,31 @@ import connexion
 from passlib.context import CryptContext
 import hashlib
 from sqlalchemy import and_
-from os import environ 
+import os
 
-# TODO: dont let firebase login multiple times
-# TODO : error checking for firebase
-# TODO: indent the file
-# TODO: check all the functions and clean up the files
-
-JWT_ISSUER = 'com.zalando.connexion'
-JWT_SECRET = 'change_this'
+JWT_ISSUER = os.environ.get('JWT_ISSUER')
+JWT_SECRET = os.environ.get('JWT_SECRET')
 JWT_LIFETIME_SECONDS = 31622400
-JWT_ALGORITHM = 'HS256'
-ADMIN_USER = '1'
-ADMIN_EMAIL = 'admin@gmail.com'
-ADMIN_PASSWORD = 'adminuser'
-MAX_IMAGE_SIZE = 10*1024*1024 
+JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM')
+ADMIN_USER = os.environ.get('ADMIN_USER')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+MAX_IMAGE_SIZE = 10*1024*1024
 MIN_IMAGE_SIZE = 2*1024
 
 # create CryptContext object
 context = CryptContext(
-        schemes=["pbkdf2_sha256"],
-        default="pbkdf2_sha256",
-        pbkdf2_sha256__default_rounds=50000
+    schemes=["pbkdf2_sha256"],
+    default="pbkdf2_sha256",
+    pbkdf2_sha256__default_rounds=50000
 )
-supported_types = ['image/bmp','image/dds','image/exif','image/gif','image/jpg','image/jpeg','image/jp2','image/jpx','image/pcx','image/png','image/pnm','image/ras','image/tga','image/tif','image/tiff','image/xbm','image/xpm']
+
+# Supported Image Types
+supported_types = ['image/bmp', 'image/dds', 'image/exif', 'image/gif', 'image/jpg', 'image/jpeg', 'image/jp2', 'image/jpx',
+                   'image/pcx', 'image/png', 'image/pnm', 'image/ras', 'image/tga', 'image/tif', 'image/tiff', 'image/xbm', 'image/xpm']
+
+
+# Initialize Firebase
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
 
@@ -47,74 +48,82 @@ def upload(user_id):
     token_info = connexion.context['token_info']
     # Get the file from request body
     file = connexion.request.files['filename']
-    # read the file and determine its size
-    size = get_size(file)
-   
-    # Allowing only the file size between 2 KB to 10 MB  ,length of the filename to be between 6 to 100 characters
-    #  Checking of the type of file is within the supported types
+
+    # Allowing only the file size between 2 KB to 10 MB ,length of the filename to be between 6 to 100 characters
+    #  Checking  the type of file is within the supported types
     # Checking if user_id,filename is not None or empty string
-    if (user_id is None or user_id is "" or file is None  or (file.filename is None) or 
-        (file.content_type not in supported_types) or (size > MAX_IMAGE_SIZE or size < MIN_IMAGE_SIZE) or
-       (len(file.filename) > 100 or len(file.filename) < 6)):
+    if (user_id is None or user_id is "" or file is None or (file.filename is None) or
+        (file.content_type not in supported_types) or (get_size(file) > MAX_IMAGE_SIZE or get_size(file) < MIN_IMAGE_SIZE) or
+            (len(file.filename) > 100 or len(file.filename) < 6)):
         abort(
             400,
             "Bad Request: Please send a valid file"
         )
 
-  
-    #  Check the token belongs to the authorized user 
-    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER :
+    #  Check the token belongs to the authorized user
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have access to uoload an image"
         )
-    
+
     # Hash the filename to prevent attacks
     name = file.filename
-    path  = hashlib.sha224(name.encode('utf-8')).hexdigest()
+    path = hashlib.sha224(name.encode('utf-8')).hexdigest()
     # Attach timestamp to the path of the file to help with the upload of files with the same name
     timestamp = int(time.time())
-    path  = path + str(timestamp)
+    path = path + str(timestamp)
 
-  
-    
-    # check the user with the given user_id and to avoid conflicts
+    # check the user with the given user_id  to avoid conflicts
     user = User.query.filter(User.id == user_id).one_or_none()
 
-     #  Return 404 if no user found
+    #  Return 404 if no user found
     if user is None:
         abort(
             404, f"Person not found for Id: {user_id}"
-            )
+        )
 
-
+    # Build an image schema
     schema = ImageSchema()
+    # build a copy of file type and change its name to the hash name
     image = file
     image.name = path
-    
-    # Store the image in firebase 
-    fireb_user = firebase.auth().sign_in_with_email_and_password(ADMIN_EMAIL,ADMIN_PASSWORD)
+
+    # Login using Firebase
+    fireb_user = firebase.auth().sign_in_with_email_and_password(
+        ADMIN_EMAIL, ADMIN_PASSWORD)
     tok = fireb_user['idToken']
-    result = storage.child(path).put(image,tok)
+
+    # Put the image in the firebase storage
+    result = storage.child(path).put(image, tok)
+    if result is None:
+        abort(
+            500, "Internal Server Error: the given image could not be stored "
+        )
+
+    # Store the download token returned from firebase
     download_token = result['downloadTokens']
-    file_path = {
+
+    file_obj = {
         "image": path,
-        "download_token" : download_token
+        "download_token": download_token
     }
-    new_image_schema = schema.load(file_path, session=db.session)
+
+    # create a new image schema
+    new_image_schema = schema.load(file_obj, session=db.session)
+
+    # Add the new image to the user
     user.images.append(new_image_schema)
     db.session.commit()
-
-    # Serialize and return the newly created image 
-    image = Images.query.order_by(Images.timestamp).filter(Images.image == path).one_or_none()
-
+    # Serialize and return the newly created image
+    image = Images.query.order_by(Images.timestamp).filter(
+        Images.image == path).one_or_none()
 
     # Serialize the data for the response
     image_schema = ImageSchema()
     data = image_schema.dump(image)
 
     return data, 201
-
 
 
 def read_images(user_id):
@@ -128,73 +137,74 @@ def read_images(user_id):
             400,
             "Bad Request: Please send valid user"
         )
-    
+
     token_info = connexion.context['token_info']
-   
-     #  Check the token belongs to the authorized user 
-    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER :
+
+    #  Check the token belongs to the authorized user
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have access to read the image"
         )
-    
+
+    # Search the user with the given user id
     user = User.query.filter(User.id == user_id).one_or_none()
 
     # The user if not found
     if user is None:
-         abort(
+        abort(
             404,
             " Not Found: No user found with the given user id"
         )
 
-    #  Search for the image associated with the  associated user
+    #  Search for the image associated with the given user id
     image = db.session.query(
-            Images
-        ).filter(
-            User.id == Permissions.user_id,
-        ).filter(
-            Images.id == Permissions.image_id,
-        ).filter(
-            User.id == user_id,
-        ).all()
+        Images
+    ).filter(
+        User.id == Permissions.user_id,
+    ).filter(
+        Images.id == Permissions.image_id,
+    ).filter(
+        User.id == user_id,
+    ).all()
 
     if image is not None:
         # Serialize the data for the response
         image_schema = ImageSchema(many=True)
         data = image_schema.dump(image)
 
-        return data,200
+        return data, 200
     else:
+        # No image found for the given user
         abort(
             404,
             " Not Found: No images found"
         )
-    
 
 
-def get_image(user_id,image_id):
+def get_image(user_id, image_id):
     """
     This function returns the download url for an image
     :param user_id:   Id of user
     :param image_id:   Id of image
     :return:   200, download url of the image
     """
-    # check if the user_id and image_id are not null or empty strings
+    # check if the user_id and image_id are  null or empty strings
     if user_id is None or user_id == "" or image_id is None or image_id == "":
         abort(
             400,
             "Bad Request: Please send valid user and image Ids"
         )
-    
+
     token_info = connexion.context['token_info']
-    
+
     # Check if the token belongs to authorized user
     if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have access to read the images"
         )
-    
+
     existing_image = (
         db.session.query(
             Images
@@ -209,27 +219,34 @@ def get_image(user_id,image_id):
         )
         .first()
     )
+
     # Check if the user is associated with the given image
     if existing_image is None:
-         abort(
+        abort(
             403,
             "Forbidden: User doesnt have permission for the given image"
         )
-  
-    url = storage.child(existing_image.image).get_url(existing_image.download_token)
 
-    return  url,200
-   
+    # Get the download url from firebase
+    url = storage.child(existing_image.image).get_url(
+        existing_image.download_token)
+
+    if url is None:
+        abort(
+            500, "Internal Server Error: The download url could not retrieved"
+        )
+
+    return url, 200
 
 
-def delete_image(user_id,image_id):
+def delete_image(user_id, image_id):
     """
-    This function returns the download url for an image
+    This function deletes an image associated with a given user
     :param user_id:   Id of user
     :param image_id:   Id of image
-    :return:        json string of list of people
+    :return:        204
     """
-     # check if the user_id and image_id are not null or empty strings
+    # check if the user_id and image_id are  null or empty strings
     if user_id is None or user_id == "" or image_id is None or image_id == "":
         abort(
             400,
@@ -237,7 +254,7 @@ def delete_image(user_id,image_id):
         )
 
     token_info = connexion.context['token_info']
-    
+
     # Check if the token belongs to authorized user
     if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
@@ -246,44 +263,49 @@ def delete_image(user_id,image_id):
         )
 
     existing_image = (db.session.query(
-            Images
-        ).filter(
-            User.id == Permissions.user_id,
-        ).filter(
-            Images.id == Permissions.image_id,
-        ).filter(
-            User.id == user_id,
-        ).filter(
-            Images.id == image_id
-        )
+        Images
+    ).filter(
+        User.id == Permissions.user_id,
+    ).filter(
+        Images.id == Permissions.image_id,
+    ).filter(
+        User.id == user_id,
+    ).filter(
+        Images.id == image_id
+    )
         .one_or_none()
     )
+
     # if current user has the permission for the given image
     if existing_image is not None:
         # check all the permissions realted to this image
-        permissions = Permissions.query.filter(Permissions.image_id == image_id).all()
+        permissions = Permissions.query.filter(
+            Permissions.image_id == image_id).all()
         # if more than one user has permission to this image then dont delete it from firebase and database
         if len(permissions) > 1:
-            delete_permission = Permissions.query.filter(and_(Permissions.image_id == image_id,Permissions.user_id == user_id)).one_or_none()
+            # Get the permission related to user_id ,image_id
+            delete_permission = Permissions.query.filter(and_(
+                Permissions.image_id == image_id, Permissions.user_id == user_id)).one_or_none()
+            # Delete the permission from the db
             db.session.delete(delete_permission)
-            db.session.commit()         
+            db.session.commit()
         else:
             # delete the image from the firebase and database
             db.session.delete(existing_image)
             db.session.commit()
+            # delete the image from firebase storage
             storage.delete(existing_image.image)
         return make_response(
             "Image deleted", 204
         )
     else:
-          abort(
-            404,
-            " Not Found: No user found with the permission for the given image id"
+        abort(
+            403,
+            "Forbidden: The given user doesnt have permission to delete this image"
         )
 
 
-
-def create_access(user_id,image_id):
+def create_access(user_id, image_id):
     """
     This function created an access for a person with 
     email provided in the request body to the image of the user with the given user_id
@@ -291,7 +313,7 @@ def create_access(user_id,image_id):
     :param image_id:   Id of image to find
     :return:        201, image to which the access was given to user with the email in request body
     """
-     # get the email from the request body
+    # get the email from the request body
     email = connexion.request.get_json()
     # check if the user_id and the image_is provided is not null or empty string and email is not empty string or null
     if user_id is None or user_id == "" or image_id is None or image_id == "" or email is None or email is {} or email["email"] is None or email["email"] is "":
@@ -301,23 +323,23 @@ def create_access(user_id,image_id):
         )
 
     token_info = connexion.context['token_info']
-   
-  # Only the authorized user or the admin should be able to access the user details    
+
+  # Only the authorized user or the admin should be able to access the user details
     if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
             "Forbidden: The given user doesnt have an access"
         )
 
-
-    check_permission = Permissions.query.filter(and_(Permissions.user_id ==  user_id, Permissions.image_id == image_id)).one_or_none()
+    # Check if current user has permission for this image
+    check_permission = Permissions.query.filter(and_(
+        Permissions.user_id == user_id, Permissions.image_id == image_id)).one_or_none()
 
     if check_permission is None:
         abort(
             403,
             "Forbidden: The given user doesnt have an access to the given image"
         )
-    
 
     # search for the user with the given email address
     email_user = User.query.filter(User.email == email["email"]).one_or_none()
@@ -328,31 +350,30 @@ def create_access(user_id,image_id):
             " Not Found: User with the given email is not found"
         )
 
-    #  Search for the image associated with the  associated user
+    #  Check if the user with the email already has permission for this image
     existing_permission = (db.session.query(
-            Permissions
-        ).filter(
-            User.id == Permissions.user_id,
-        ).filter(
-            Images.id == Permissions.image_id,
-        ).filter(
-            User.email == email["email"],
-        ).filter(
-            Images.id == image_id
-        )
+        Permissions
+    ).filter(
+        User.id == Permissions.user_id,
+    ).filter(
+        Images.id == Permissions.image_id,
+    ).filter(
+        User.email == email["email"],
+    ).filter(
+        Images.id == image_id
+    )
         .one_or_none()
     )
-    # This means the persmission already exists
+    # User with the email already has persmissions
     if existing_permission is not None:
         abort(
             409,
             "Conflict: the permission already exists"
         )
-  
 
     # get the image which needs to be added to  the email_user
     image = Images.query.filter(Images.id == image_id).one_or_none()
-    
+
     schema = ImageSchema()
     # append the image to the user
     email_user.images.append(image)
@@ -373,11 +394,11 @@ def get_size(fobj):
 
     try:
         pos = fobj.tell()
-        fobj.seek(0, 2)  #seek to end
+        fobj.seek(0, 2)  # seek to end
         size = fobj.tell()
         fobj.seek(pos)  # back to original position
         return size
     except (AttributeError, IOError):
         pass
 
-    return 0  
+    return 0

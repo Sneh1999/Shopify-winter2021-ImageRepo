@@ -9,12 +9,12 @@ import connexion
 from passlib.context import CryptContext
 from sqlalchemy import and_
 
-# TODO: check that admin has access to all teh users and teh
-JWT_ISSUER = 'com.zalando.connexion'
-JWT_SECRET = 'change_this'
+
+JWT_ISSUER = os.environ.get('JWT_ISSUER')
+JWT_SECRET = os.environ.get('JWT_SECRET')
 JWT_LIFETIME_SECONDS = 31622400
-JWT_ALGORITHM = 'HS256'
-ADMIN_USER = '1'
+JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM')
+ADMIN_USER = os.environ.get('ADMIN_USER')
 
 # create CryptContext object
 context = CryptContext(

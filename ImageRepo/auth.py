@@ -6,13 +6,14 @@ from werkzeug.exceptions import Unauthorized
 from jose import JWTError, jwt
 from models import User
 from passlib.context import CryptContext
-from os import environ 
+import os
 
 
-JWT_ISSUER = 'com.zalando.connexion'
-JWT_SECRET = 'change_this'
+JWT_ISSUER = os.environ.get('JWT_ISSUER')
+JWT_SECRET = os.environ.get('JWT_SECRET')
 JWT_LIFETIME_SECONDS = 31622400
-JWT_ALGORITHM = 'HS256'
+JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM')
+
 
 
 # create CryptContext object
