@@ -4,7 +4,6 @@
  ImageRepo/.DS_Store
 ImageRepo/__pycache__/
 ImageRepo/certificate.py
-ImageRepo/image.db
 ImageRepo/key.json
 ImageRepo/mypython/
 ImageRepo/rootCA.key

@@ -14,7 +14,7 @@ from os import environ
 # TODO: dont let firebase login multiple times
 # TODO : error checking for firebase
 # TODO: indent the file
-# TODO: check all the functions and clean up teh files
+# TODO: check all the functions and clean up the files
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
