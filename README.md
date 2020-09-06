@@ -64,6 +64,36 @@ Image repo challenge
 
 - The image repository has a user which has an email,first name,last name,email,password and a list of images to which he has  authorization.
 
+    - Get all the users: GET {/users}
+        - This function is only allowed to be accessed only by the admin. Use the admin username and password provided above. This is to make sure that no  user other than the admin has access to other user's details.You need to login  as the admin to access this endpoint.
+    
+        - Curl Request:
+            ```
+                curl -X GET "https://imagerepo-shopify.herokuapp.com/users" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM1NDY5OCwiZXhwIjoxNTk5MzYwNjk4LCJzdWIiOiIxIn0.hCr8FgUZBB4aRvx8ITb10-rIuaoT7F6HVirbMRBH4sU"
+            ```
+        - Swagger UI interface
+
+        - Example Response body:
+            ```
+                [
+                    {
+                        "email": "string",
+                        "fname": "string",
+                        "id": 2,
+                        "images": [],
+                        "lname": "string",
+                        "timestamp": "2020-09-06T01:12:05.280970"
+                    },
+                    {
+                        "email": "admin",
+                        "fname": "admin",
+                        "id": 1,
+                        "images": [],
+                        "lname": "admin",
+                        "timestamp": "2020-09-06T00:37:30.702541"
+                    }
+                ]
+            ```
     - To get a particular user: Get /users/{user_id}
         - Curl request 
             ```
@@ -115,36 +145,51 @@ Image repo challenge
 
         - Example Response: Empty Response
     
-    - Get all the users: GET {/users}
-        - This function is only allowed to be accessed only by the admin. Use the admin username and password provided above. This is to make sure that no  user other than the admin has access to other user's details.You need to login  as the admin to access this endpoint.
-    
-        - Curl Request:
-            ```
-                curl -X GET "https://imagerepo-shopify.herokuapp.com/users" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM1NDY5OCwiZXhwIjoxNTk5MzYwNjk4LCJzdWIiOiIxIn0.hCr8FgUZBB4aRvx8ITb10-rIuaoT7F6HVirbMRBH4sU"
-            ```
-        - Swagger UI interface
-
-        - Example Response body:
-            ```
-                [
-                    {
-                        "email": "string",
-                        "fname": "string",
-                        "id": 2,
-                        "images": [],
-                        "lname": "string",
-                        "timestamp": "2020-09-06T01:12:05.280970"
-                    },
-                    {
-                        "email": "admin",
-                        "fname": "admin",
-                        "id": 1,
-                        "images": [],
-                        "lname": "admin",
-                        "timestamp": "2020-09-06T00:37:30.702541"
-                    }
-                ]
-            ```
+ <p align="center">
+    <u><h2 align="center">Images</h2></u>
+</p>   
         
+- Images can be uploaded,downloaded and deleted.One user can have multiple images and Images can be shared between users.
 
+    - Upload an image :
+        - <b>Storage of an image</b>: 
+            - The storage of the image is done in Firebase cloud storage and not in the database because of multiple reasons realating to security, costs and backups
+            -  Image.db only contains the hash of the image name(Name of the file is hashed because of security reasons)
+            - Firebase Cloud Storage has restrictive write permissions,Only allowing admin to upload the images for security reasons.
+        - <b>To ensure secure uploading of an image</B> :
+            - File names are hashed and then stored in the database
+            - File names have a limit on how many characters they can contain
+            - Only Specific types of image types are supported
+            - There is a restriction on the file size
+        -  <b> Ensure Bulk Images are uploaded </b>:
+            - Only allowing one image to be uploaded at a time : Reason for that being if multiple images are uploaded together, if one image is malicious the whole request fails and its better to follow a parallel model than a sequential one.
+            - Planning on deploying multiple instances of the app in the future and using a load balancer to balance the load to support bulk image support in parallel.
+        - Upload an Image: Post {{/users/{user_id}/images}}
+            - Curl request
+                ```
+                curl -X POST "https://imagerepo-shopify.herokuapp.com/users/2/images" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM2NzM2MiwiZXhwIjoxNTk5MzczMzYyLCJzdWIiOiIyIn0.QEzICcnOVNPtewgTdfnQK_ZvZ96QVuiq-bEi05jbDHw" -H  "Content-Type: multipart/form-data" -F "filename=@2k9lib (1).jpg;type=image/jpeg"
+                ```
+            - Swagger Ui interface:
 
+            - Sample Request Body:
+                ```
+                {
+                    "download_token": "af961ba0-f204-4236-b3ef-b56b5103deb2",
+                    "id": 1,
+                    "image": "e68cd5001de84539fe4ef8b99c63e515b852ad956a1470b78d028ac21599367402",
+                    "timestamp": "2020-09-06T04:43:22.618393",
+                    "user": [
+                        2
+                    ]
+                }
+                ```
+    - Downloading an image:
+        - Download : The file's download url is generated using firebase
+        - Security during download:
+            - The download url is an unique url generated by firebase
+            - Only admin has access on the read and can generate the url
+            - Only users with permission for the image can download the image
+        - Ensure Bulk Imgaes are deleted : Following a parallel model(As in the case of upload),only allowing one image to be deleted at a time
+         
+        
+        
