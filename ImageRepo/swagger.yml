@@ -6,6 +6,7 @@ paths:
   /login:
     post:
       summary: Return JWT token
+      description: This helps in creating a JWT token based on the email and password defined by the user.You can only login after you have created a user using  ( POST {/users}).(Copy and paste the JWT token generated to the Swagger UI authorize button to get authorization). 
       operationId: auth.generate_token
       requestBody:
         content:
@@ -39,6 +40,7 @@ paths:
     post:
       operationId: user.create
       summary: Create an user
+      description: This helps in creating a new user based on the details provided in the request body
       requestBody:
         content:
           application/json:
@@ -92,6 +94,7 @@ paths:
     get:
       operationId: user.get_users
       summary: Get users
+      description: This helps the admin get a list of all the users.
       security:
         - bearerAuth: []
       responses:
@@ -134,6 +137,7 @@ paths:
         - bearerAuth: []
       operationId: user.get_user
       summary: Get a particular user
+      description: This helps in getting the details of one particular user.This is only accessible by the user  itself and the admin
       parameters:
         - name: user_id
           in: path
@@ -196,7 +200,7 @@ paths:
         - bearerAuth: []
       operationId: user.put_user
       summary: Ammend a user
-      description: Ammend a user
+      description: This helps in ammending the user details.This can be acessed by only the authorized user and the admin
       parameters:
         - name: user_id
           in: path
@@ -255,7 +259,7 @@ paths:
         - bearerAuth: []
       operationId: user.delete_user
       summary: Delete a user
-      description: Delete a user
+      description: Helps in deleting a user. Only the admin and the authorized user can delete its account
       parameters:
         - name: user_id
           in: path
@@ -284,6 +288,7 @@ paths:
         - bearerAuth: []
       operationId: image.read_images
       summary: Reading a list  of images
+      description: This helps in retreiving all the images related to a user.Only the admin and the authorized user can retrieve all the images
       parameters:
         - name: user_id
           in: path
@@ -335,6 +340,7 @@ paths:
         - bearerAuth: []
       operationId: image.upload
       summary: Uploading an image
+      description: This helps in uploading a single image.Only the admin and the authorized user can upload an image
       parameters:
         - name: user_id
           in: path
@@ -391,7 +397,8 @@ paths:
       security:
         - bearerAuth: []
       operationId: image.get_image
-      summary: Get a particular image
+      summary: Get the download url for an image 
+      description: This helps in getting the download url of a particular image by the authorized user and the admin.To check if the download url is working, copy and paste it in a new chrome tab and hit enter :)
       parameters:
         - name: user_id
           in: path
@@ -415,12 +422,23 @@ paths:
               schema:
                 type: string
                 example: "https://someurl.com"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '5XX':
+          description: Unexpected error.
+          
     delete:
       security:
         - bearerAuth: []
       operationId: image.delete_image
       summary: Delete an image for a user
-      description: Delete an image for a user
+      description: This function helps in deleting an image by the admin and the authorized user
       parameters:
         - name: user_id
           in: path
@@ -457,6 +475,7 @@ paths:
         - bearerAuth: []
       operationId: image.create_access
       summary: To provide access of an image to a user for other user's image
+      description: This function helps one user(param = user_id) provide access of his image(param = image_id) to another user(whose email is provided in the request body).Only the admin and the authorized user can use this functionality
       parameters:
         - name: user_id
           in: path

@@ -4,3 +4,4 @@
  ImageRepo/.DS_Store
 ImageRepo/__pycache__/
 .env
+ImageRepo/imagerepo

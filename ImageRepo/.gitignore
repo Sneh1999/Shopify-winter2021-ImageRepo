@@ -1,2 +1,6 @@
 .env
 __pycache__
+imagerepo
+key.json
+.DS_Store
+static/.DS_Store

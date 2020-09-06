@@ -11,7 +11,7 @@ import os
 
 JWT_ISSUER = os.environ.get('JWT_ISSUER')
 JWT_SECRET = os.environ.get('JWT_SECRET')
-JWT_LIFETIME_SECONDS = 31622400
+JWT_LIFETIME_SECONDS = 6000
 JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM')
 
 
