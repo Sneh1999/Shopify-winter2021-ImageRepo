@@ -8,15 +8,11 @@ Built an image repository which allows the user to register,login,upload new ima
 
 # Table of Contents
 - [Authentication](#authentication)
-- [Model](#model)
-    - [Endpoints](#endpoints)
-- [Authentication](#authentication)
 - [User](#user)
 - [Images](#images)
 - [Permission](#permissions)
 - [Future Features](#future-features)
 - [Local Development](#local-development)
-- [Contact Me](#contact-me)
 
 ## Features
 
@@ -279,24 +275,10 @@ Built an image repository which allows the user to register,login,upload new ima
     <u><h2 align="center">Future Features</h2></u>
 </p>
 
-- Making multiple instances of my app and run a load balancer to balance the load between various instances so that the bulf images get uploaded faster 
+- Making multiple instances of my app and running a load balancer to balance the load between various instances so that the bulk images get uploaded faster 
 - Make the UI interface for the app
 - Have the  ability to revoke access to an image for another user
-
-<p align="center">
-    <u><h2 align="center">Local Development</h2></u>
-</p>
-
-- Install Docker and Docker Compose
-- On firebase create a new project on  https://console.firebase.google.com/
-- Intialize firebase storage 
-- Create an admin user under authentication
-- Register app and add the Firebase config variables in certificate.py file
-- To get the the serviceAccount, go to project->settings->Firebase SDK snippet and then add the config variables
-- To run the app 
-    ```
-        docker-compose up --build
-    ```
+- Building health checks for the instances 
 
 
 <p align="center">
