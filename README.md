@@ -190,6 +190,56 @@ Image repo challenge
             - Only admin has access on the read and can generate the url
             - Only users with permission for the image can download the image
         - Ensure Bulk Imgaes are deleted : Following a parallel model(As in the case of upload),only allowing one image to be deleted at a time
-         
-        
-        
+        - Download an Image: Get {{/users/{user_id}/images/{image_id}}}
+            - Curl request:
+                ```
+                    curl -X GET "https://imagerepo-shopify.herokuapp.com/users/2/images/1" -H  "accept: text/plain" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
+                ```
+            - Swagger UI interface
+
+            - Sample response body:
+                ```
+                    https://firebasestorage.googleapis.com/v0/b/shopify-d7101.appspot.com/o/e68cd5001de84539fe4ef8b99c63e515b852ad956a1470b78d028ac21599435395?alt=media&token=c8bbf46d-fe8e-45a6-8170-89862a965b46
+                ```
+    - Reading a list of images:
+        -  This endpoint helps in reading all the images realted to a user.Only an authorized user and the admin can access this.
+        - Curl request:
+            ```
+            curl -X GET "https://imagerepo-shopify.herokuapp.com/users/2/images" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
+            ```
+        - Swagger UI interface:
+
+        - Sample response body:
+            ```
+                [
+                    {
+                        "download_token": "c8bbf46d-fe8e-45a6-8170-89862a965b46",
+                        "id": 1,
+                        "image": "e68cd5001de84539fe4ef8b99c63e515b852ad956a1470b78d028ac21599435395",
+                        "timestamp": "2020-09-06T23:36:35.870114",
+                        "user": [
+                        2
+                        ]
+                    }
+                ]
+            ```
+    - Deleting an image for the user:
+        - <b>Secure Deletion of the image </b>: 
+            - This function is used to delete a permission of a user for an image from the permission.db table. The image gets deleted from firebase only when no user is left with the permission for the given image 
+            - Only an authorized user and admin can delete permission for the image
+            - Firebase is coonfigured to only allow admin credentiaks to delete the image
+        - <b>Ensuring bulk deletion of the images</b>: Only one image is allowed to be deleted at a time to follow a parallel model instead of a sequential model to prevent malicious attacks and speed of the response
+        - Delete an image : Delete {{/users/{user_id}/images/{image_id}}}
+            - Curl request
+                ```
+                    curl -X DELETE "https://imagerepo-shopify.herokuapp.com/users/2/images/1" -H  "accept: */*" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
+                ```
+            - Swagger UI interface:
+
+            - Sample response :
+                ```
+                204: Successfully deleted access to an image
+                ```
+<p align="center">
+    <u><h2 align="center">Permissions</h2></u>
+</p>
