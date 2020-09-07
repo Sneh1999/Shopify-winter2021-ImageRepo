@@ -34,6 +34,7 @@ Built an image repository which allows the user to register,login,upload new ima
         ```
 
     - The Swagger UI interface
+        ![createuser](https://user-images.githubusercontent.com/35871990/92342777-e4553380-f08f-11ea-9698-d6f6dfed10e6.png)
 
     - Sample Response Body
         ```
@@ -55,14 +56,15 @@ Built an image repository which allows the user to register,login,upload new ima
         ```
     - The Swagger UI interface
         [loginimage](https://github.com/Sneh1999/Shopify-winter2021-private/blob/master/ImageRepo/static/images/login.png?raw=true)
-        
+
     -  Example response is a JWT token
         ```
         eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM1MzI3MiwiZXhwIjoxNTk5MzU5MjcyLCJzdWIiOiIyIn0.tWo9C46sw4_JSPFS-uRBKvYFdVvFduFVBAuDKG8dEzs
         ```
 
 - <b> To further access any other feature in Swagger UI paste the JWT token by clicking the Authorize button </b>
-
+    ![authorizeButton](https://user-images.githubusercontent.com/35871990/92342926-5f1e4e80-f090-11ea-950a-dbadfe4e8a01.png)
+    ![authorizebuttonmodel](https://user-images.githubusercontent.com/35871990/92342937-680f2000-f090-11ea-8cb7-da25821417ff.png)
 
 
 
@@ -80,7 +82,7 @@ Built an image repository which allows the user to register,login,upload new ima
                 curl -X GET "https://imagerepo-shopify.herokuapp.com/users" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM1NDY5OCwiZXhwIjoxNTk5MzYwNjk4LCJzdWIiOiIxIn0.hCr8FgUZBB4aRvx8ITb10-rIuaoT7F6HVirbMRBH4sU"
             ```
         - Swagger UI interface
-
+            ![login](https://user-images.githubusercontent.com/35871990/92342787-ed460500-f08f-11ea-819d-fef7bf6f7afc.png)
         - Example Response body:
             ```
                 [
@@ -109,7 +111,7 @@ Built an image repository which allows the user to register,login,upload new ima
             ```
 
         - Swagger UI interface
-
+            ![getuser](https://user-images.githubusercontent.com/35871990/92342804-f8009a00-f08f-11ea-8bbe-47038e48ee6c.png)
         - Example Response is a user object
             ```
             {
@@ -129,6 +131,7 @@ Built an image repository which allows the user to register,login,upload new ima
             ```
         
         - Swagger UI interface
+            ![ammenduser](https://user-images.githubusercontent.com/35871990/92342826-08187980-f090-11ea-9dcc-8cf083efd2bc.png)
 
         - Example Response:
             ```
@@ -149,7 +152,7 @@ Built an image repository which allows the user to register,login,upload new ima
                 curl -X DELETE "https://imagerepo-shopify.herokuapp.com/users/2" -H  "accept: */*" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM1MzI3MiwiZXhwIjoxNTk5MzU5MjcyLCJzdWIiOiIyIn0.tWo9C46sw4_JSPFS-uRBKvYFdVvFduFVBAuDKG8dEzs"
             ```
         - Swagger UI interface
-
+            ![deleteuser](https://user-images.githubusercontent.com/35871990/92342912-52015f80-f090-11ea-9ebb-fa30e9d183a1.png)
 
         - Example Response: Empty Response
     
@@ -178,7 +181,7 @@ Built an image repository which allows the user to register,login,upload new ima
                 curl -X POST "https://imagerepo-shopify.herokuapp.com/users/2/images" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM2NzM2MiwiZXhwIjoxNTk5MzczMzYyLCJzdWIiOiIyIn0.QEzICcnOVNPtewgTdfnQK_ZvZ96QVuiq-bEi05jbDHw" -H  "Content-Type: multipart/form-data" -F "filename=@2k9lib (1).jpg;type=image/jpeg"
                 ```
             - Swagger Ui interface:
-
+                <img width="1426" alt="uploadimage" src="https://user-images.githubusercontent.com/35871990/92342842-16669580-f090-11ea-83ba-23843b1e4385.png">
             - Sample Request Body:
                 ```
                 {
@@ -204,7 +207,7 @@ Built an image repository which allows the user to register,login,upload new ima
                     curl -X GET "https://imagerepo-shopify.herokuapp.com/users/2/images/1" -H  "accept: text/plain" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
                 ```
             - Swagger UI interface
-
+                ![downloadimage](https://user-images.githubusercontent.com/35871990/92342857-23838480-f090-11ea-940f-e1cadee73a35.png)
             - Sample response body:
                 ```
                     https://firebasestorage.googleapis.com/v0/b/shopify-d7101.appspot.com/o/e68cd5001de84539fe4ef8b99c63e515b852ad956a1470b78d028ac21599435395?alt=media&token=c8bbf46d-fe8e-45a6-8170-89862a965b46
@@ -216,7 +219,7 @@ Built an image repository which allows the user to register,login,upload new ima
             curl -X GET "https://imagerepo-shopify.herokuapp.com/users/2/images" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
             ```
         - Swagger UI interface:
-
+            ![readingimages](https://user-images.githubusercontent.com/35871990/92342895-47df6100-f090-11ea-88c1-e201fce1762c.png)
         - Sample response body:
             ```
                 [
@@ -243,7 +246,7 @@ Built an image repository which allows the user to register,login,upload new ima
                     curl -X DELETE "https://imagerepo-shopify.herokuapp.com/users/2/images/1" -H  "accept: */*" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
                 ```
             - Swagger UI interface:
-
+                ![deleteimage](https://user-images.githubusercontent.com/35871990/92342870-30a07380-f090-11ea-8ff5-43d13a17fb7e.png)
             - Sample response :
                 ```
                 204: Successfully deleted access to an image
@@ -258,6 +261,7 @@ Built an image repository which allows the user to register,login,upload new ima
         curl -X POST "https://imagerepo-shopify.herokuapp.com/users/2/images/1/access" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTM2NywiZXhwIjoxNTk5NDQxMzY3LCJzdWIiOiIyIn0.6uVzJyem-FhQpUoiht3S1TWqmATpnE4nHGsp2mtgjSY" -H  "Content-Type: application/json" -d "{\"email\":\"str\"}"
         ```
     - Swagger ui interface
+        ![access](https://user-images.githubusercontent.com/35871990/92342882-38f8ae80-f090-11ea-9fb8-7371cebb5a98.png)
     - Sample response body:
         ```
         {
