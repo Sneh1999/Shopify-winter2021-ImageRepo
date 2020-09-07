@@ -276,4 +276,24 @@ Image repo challenge
     <u><h2 align="center">Local Development</h2></u>
 </p>
 
+- Install Docker and Docker Compose
+- On firebase create a new project on  https://console.firebase.google.com/
+- Intialize firebase storage 
+- Create an admin user under authentication
+    ```
+    username : admin
+    password: admin
+    ```
+- Register app and add the Firebase config variables in certificate.py file
+- To get the the serviceAccount, go to project->settings->Firebase SDK snippet and then add the config variblaes
+- To run the app 
+    ```
+        docker-compose up --build
+    ```
 
+
+<p align="center">
+    <u><h2 align="center">Contact Me</h2></u>
+</p>
+
+Email : s2koul@uwaterloo.ca
