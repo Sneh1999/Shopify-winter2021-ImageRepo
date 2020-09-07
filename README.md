@@ -20,7 +20,7 @@ Built an image repository which allows the user to register,login,upload new ima
     <u><h2 align="center">Authentication</h2></u>
 </p>
 
--  I chose JWT based authentication. The server generates a JWT token that verifies the user identity and sends it to the back to the client. 
+-  I chose JWT based authentication. The server generates a JWT token that verifies the user identity and sends  back to the client. 
 - I have created an admin  which has access to all the functionalities in the Image Repository and can function as the root to get the details of other users.By default the first user created is the admin user.
 
     ```
@@ -30,7 +30,7 @@ Built an image repository which allows the user to register,login,upload new ima
 
 -  <b>Create a new user</b>: Post {/users} -  Pass in the first name,last name,email and password in the request body.These details get stored in the user.db table.The password is first encypted using  pbkdf2_sha256 and then stored in the database for safety.
 
-    -  CURL REQUEST for creating a new user
+    -  Curl request for creating a new user
         ```
         curl -X POST "https://imagerepo-shopify.herokuapp.com/users" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{\"email\":\"string\",\"fname\":\"string\",\"lname\":\"string\",\"password\":\"string\"}"
         ```
@@ -50,7 +50,7 @@ Built an image repository which allows the user to register,login,upload new ima
         }
         ```
 
--  <b>Login for an existing user</b>: Provide the email and password of the user created above in the login endpoint. This function returns back a JWT token based on details verified agaisnt the details in the user.db.The password is verified by creating a hash and then checking if the hash matches the hash in the db.
+-  <b>Login for an existing user</b>: Post {/login} - Provide the email and password of the user created above in the login endpoint. This function returns back a JWT token based on details verified agaisnt the details in the user.db.The password is verified by creating a hash and then checking if the hash matches the hash in the db.
 
     - CURL REQUEST for login
         ```
@@ -156,17 +156,20 @@ Built an image repository which allows the user to register,login,upload new ima
         - Swagger UI interface
             ![deleteuser](https://user-images.githubusercontent.com/35871990/92342912-52015f80-f090-11ea-9ebb-fa30e9d183a1.png)
 
-        - Example Response: Empty Response
+        - Example Response: 
+            ```	
+                 204, Successfully deleted a user
+            ```
     
  <p align="center">
     <u><h2 align="center">Images</h2></u>
 </p>   
         
-- Images can be uploaded,downloaded and deleted.One user can have multiple images and Images can be shared between users.
+- Images can be uploaded,downloaded and deleted. One user can have multiple images and Images can be shared between users.
 
     - Upload an image :
         - <b>Storage of an image</b>: 
-            - The storage of the image is done in Firebase cloud storage and not in the database because of multiple reasons realating to security, costs and backups
+            - The storage of the image is done in Firebase cloud storage and not in the database because of multiple reasons relating to security, costs and backups
             -  Image.db only contains the hash of the image name(Name of the file is hashed because of security reasons)
             - Firebase Cloud Storage has restrictive write permissions,Only allowing admin to upload the images for security reasons.
         - <b>To ensure secure uploading of an image</B> :
@@ -175,8 +178,8 @@ Built an image repository which allows the user to register,login,upload new ima
             - Only Specific types of image types are supported
             - There is a restriction on the file size
         -  <b> Ensure Bulk Images are uploaded </b>:
-            - Only allowing one image to be uploaded at a time : Reason for that being if multiple images are uploaded together, if one image is malicious the whole request fails and its better to follow a parallel model than a sequential one.
-            - Planning on deploying multiple instances of the app in the future and using a load balancer to balance the load to support bulk image support in parallel.
+            - Only allowing one image to be uploaded at a time : Reason is to allow parallel uploading instead of sequential to prevent malicious attacks and increase speed of the response.
+            - Planning on deploying multiple instances of the app in the future and using a load balancer to balance the load to increase the upload speed of bulk images.
         - Upload an Image: Post {{/users/{user_id}/images}}
             - Curl request
                 ```
@@ -202,7 +205,7 @@ Built an image repository which allows the user to register,login,upload new ima
             - The download url is an unique url generated by firebase
             - Only admin has access on the read and can generate the url
             - Only users with permission for the image can download the image
-        - Ensure Bulk Imgaes are deleted : Following a parallel model(As in the case of upload),only allowing one image to be deleted at a time
+        - Ensure Bulk Imgaes are deleted : Following a parallel model(As in the case of upload),only allowing one image to be deleted at a time to prevent malicious attacks and increase speed of the response.
         - Download an Image: Get {{/users/{user_id}/images/{image_id}}}
             - Curl request:
                 ```
@@ -214,8 +217,8 @@ Built an image repository which allows the user to register,login,upload new ima
                 ```
                     https://firebasestorage.googleapis.com/v0/b/shopify-d7101.appspot.com/o/e68cd5001de84539fe4ef8b99c63e515b852ad956a1470b78d028ac21599435395?alt=media&token=c8bbf46d-fe8e-45a6-8170-89862a965b46
                 ```
-    - Reading a list of images:
-        -  This endpoint helps in reading all the images realted to a user.Only an authorized user and the admin can access this.
+    - Reading a list of images: Get {{/users/{user_id}/imagesß}}
+        -  This endpoint helps in reading all the images related to a user.Only an authorized user and  admin can access this.
         - Curl request:
             ```
             curl -X GET "https://imagerepo-shopify.herokuapp.com/users/2/images" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTMzMCwiZXhwIjoxNTk5NDQxMzMwLCJzdWIiOiIyIn0.GAyDLi1mrjf-zs2jNQ_wKxMSqe1kMP_2axR7o9Bx9EI"
@@ -240,8 +243,8 @@ Built an image repository which allows the user to register,login,upload new ima
         - <b>Secure Deletion of the image </b>: 
             - This function is used to delete a permission of a user for an image from the permission.db table. The image gets deleted from firebase only when no user is left with the permission for the given image 
             - Only an authorized user and admin can delete permission for the image
-            - Firebase is coonfigured to only allow admin credentiaks to delete the image
-        - <b>Ensuring bulk deletion of the images</b>: Only one image is allowed to be deleted at a time to follow a parallel model instead of a sequential model to prevent malicious attacks and speed of the response
+            - Firebase is configured to only allow admin credentials to delete the image
+        - <b>Ensuring bulk deletion of the images</b>: Only one image is allowed to be deleted at a time to follow a parallel model instead of a sequential model to prevent malicious attacks and increase speed of the response
         - Delete an image : Delete {{/users/{user_id}/images/{image_id}}}
             - Curl request
                 ```
@@ -257,7 +260,7 @@ Built an image repository which allows the user to register,login,upload new ima
     <u><h2 align="center">Permissions</h2></u>
 </p>
 
-- Have you ever used google photos ? Wanna share your photos with your friends ? Here you go :) . Permissions allows a user to give another user permission for his image.Just provide the email of teh user in the request body to give him permission for your image.Cool right :) 
+- Have you ever used google photos ? Wanna share your photos with your friends ? Here you go :) . Permissions allows a user to give another user permission for his image.Just provide the email of the user in the request body to give him permission for your image.Cool right :) 
     - Sample Curl request:
         ```
         curl -X POST "https://imagerepo-shopify.herokuapp.com/users/2/images/1/access" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTM2NywiZXhwIjoxNTk5NDQxMzY3LCJzdWIiOiIyIn0.6uVzJyem-FhQpUoiht3S1TWqmATpnE4nHGsp2mtgjSY" -H  "Content-Type: application/json" -d "{\"email\":\"str\"}"
