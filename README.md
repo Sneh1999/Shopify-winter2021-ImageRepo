@@ -11,8 +11,8 @@ Built an image repository which allows the user to register,login,upload new ima
 - [Images](#images)
 - [Permission](#permissions)
 - [Future Features](#future-features)
-- [Note For Shopify Developers](##note-for-shopify-developers)
-- [Contact Me](#contact-met)
+- [Note For Shopify Developers](#note-for-shopify-developers)
+- [Contact Me](#contact-me)
 
 ## Features
 
