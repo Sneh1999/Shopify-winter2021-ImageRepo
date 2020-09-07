@@ -294,7 +294,7 @@ Built an image repository which allows the user to register,login,upload new ima
     <u><h2 align="center">Note for Shopify Developers</h2></u>
 </p>
 
-- As I am using a free version of heroku it has a problem of [Heroku](https://devcenter.heroku.com/articles/sqlite3)
+- As I am using a free version of heroku it has a problem :
 ```
 Heroku’s Cedar stack has an ephemeral filesystem. You can write to it, and you can read from it, but the contents will be cleared periodically.
 ```
