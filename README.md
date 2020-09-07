@@ -54,7 +54,8 @@ Built an image repository which allows the user to register,login,upload new ima
         curl -X POST "https://imagerepo-shopify.herokuapp.com/login" -H  "accept: text/plain" -H  "Content-Type: application/json" -d "{\"email\":\"string\",\"password\":\"string\"}"
         ```
     - The Swagger UI interface
-
+        [loginimage](https://github.com/Sneh1999/Shopify-winter2021-private/blob/master/ImageRepo/static/images/login.png?raw=true)
+        
     -  Example response is a JWT token
         ```
         eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTM1MzI3MiwiZXhwIjoxNTk5MzU5MjcyLCJzdWIiOiIyIn0.tWo9C46sw4_JSPFS-uRBKvYFdVvFduFVBAuDKG8dEzs
