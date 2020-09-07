@@ -255,11 +255,12 @@ def delete_image(user_id, image_id):
 
     token_info = connexion.context['token_info']
 
+    
     # Check if the token belongs to authorized user
     if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
         abort(
             403,
-            "Forbidden: The given user doesnt have access to read the images"
+            "Forbidden: The given user doesnt have access to delete the image"
         )
 
     existing_image = (db.session.query(

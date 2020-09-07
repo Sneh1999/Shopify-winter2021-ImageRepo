@@ -12,7 +12,7 @@ Built an image repository which allows the user to register,login,upload new ima
 - [Images](#images)
 - [Permission](#permissions)
 - [Future Features](#future-features)
-- [Local Development](#local-development)
+- [Contact Me](#contact-met)
 
 ## Features
 
