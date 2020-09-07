@@ -11,6 +11,7 @@ Built an image repository which allows the user to register,login,upload new ima
 - [Images](#images)
 - [Permission](#permissions)
 - [Future Features](#future-features)
+- [Note For Shopify Developers](##note-for-shopify-developers)
 - [Contact Me](#contact-met)
 
 ## Features
@@ -293,13 +294,13 @@ Built an image repository which allows the user to register,login,upload new ima
     <u><h2 align="center">Note for Shopify Developers</h2></u>
 </p>
 
-- As I am using a free version of heroku it has a problem of ![Heroku](https://devcenter.heroku.com/articles/sqlite3)
+- As I am using a free version of heroku it has a problem of [Heroku](https://devcenter.heroku.com/articles/sqlite3)
 ```
 Heroku’s Cedar stack has an ephemeral filesystem. You can write to it, and you can read from it, but the contents will be cleared periodically.
 ```
 - Best way to test if the data is getting stored properly is to open two tabs and see that its working correctly 
 - I will migrate to aws or gcp in the future releases.
-- Thankyou  for yout time :) 
+- Thankyou  for your time :) 
 
 <p align="center">
     <u><h2 align="center">Contact Me</h2></u>
