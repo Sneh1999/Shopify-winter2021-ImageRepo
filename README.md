@@ -21,12 +21,14 @@ Built an image repository which allows the user to register,login,upload new ima
 </p>
 
 -  I chose JWT based authentication. The server generates a JWT token that verifies the user identity and sends it to the back to the client. 
-- I have created an admin which can be used to access which has access to all the functionalities in the Image Repository and can function as the root to access the details of other users.By default the first user created is the admin user.
+- I have created an admin  which has access to all the functionalities in the Image Repository and can function as the root to get the details of other users.By default the first user created is the admin user.
+
     ```
         username : admin
         password: admin
     ```
--  <b>Create a new user</b>: Pass in the first name,last name,email and password in the request body.These details get stored in the user.db table.The password is first encypted using  pbkdf2_sha256 and then stored in the database for safety.
+
+-  <b>Create a new user</b>: Post {/users} -  Pass in the first name,last name,email and password in the request body.These details get stored in the user.db table.The password is first encypted using  pbkdf2_sha256 and then stored in the database for safety.
 
     -  CURL REQUEST for creating a new user
         ```
@@ -55,7 +57,7 @@ Built an image repository which allows the user to register,login,upload new ima
         curl -X POST "https://imagerepo-shopify.herokuapp.com/login" -H  "accept: text/plain" -H  "Content-Type: application/json" -d "{\"email\":\"string\",\"password\":\"string\"}"
         ```
     - The Swagger UI interface
-        [loginimage](https://github.com/Sneh1999/Shopify-winter2021-private/blob/master/ImageRepo/static/images/login.png?raw=true)
+        ![loginimage](https://github.com/Sneh1999/Shopify-winter2021-private/blob/master/ImageRepo/static/images/login.png?raw=true)
 
     -  Example response is a JWT token
         ```
