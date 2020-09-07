@@ -243,3 +243,37 @@ Image repo challenge
 <p align="center">
     <u><h2 align="center">Permissions</h2></u>
 </p>
+
+- Have you ever used google photos ? Wanna share your photos with your friends ? Here you go :) . Permissions allows a user to give another user permission for his image.Just provide the email of teh user in the request body to give him permission for your image.Cool right :) 
+    - Sample Curl request:
+        ```
+        curl -X POST "https://imagerepo-shopify.herokuapp.com/users/2/images/1/access" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOm51bGwsImlhdCI6MTU5OTQzNTM2NywiZXhwIjoxNTk5NDQxMzY3LCJzdWIiOiIyIn0.6uVzJyem-FhQpUoiht3S1TWqmATpnE4nHGsp2mtgjSY" -H  "Content-Type: application/json" -d "{\"email\":\"str\"}"
+        ```
+    - Swagger ui interface
+    - Sample response body:
+        ```
+        {
+            "download_token": "9ee0e29a-75a4-4572-92d4-f5e8957ef0cf",
+            "id": 1,
+            "image": "e68cd5001de84539fe4ef8b99c63e515b852ad956a1470b78d028ac21599437761",
+            "timestamp": "2020-09-07T00:16:02.367533",
+            "user": [
+                2,
+                3
+            ]
+        }
+        ```
+
+<p align="center">
+    <u><h2 align="center">Future Features</h2></u>
+</p>
+
+- Making multiple instances of my app and run a load balancer to balance the load between various instances so that the bulf images get uploaded faster 
+- Make the UI interface for the app
+- Have the  ability to revoke access to an image for another user
+
+<p align="center">
+    <u><h2 align="center">Local Development</h2></u>
+</p>
+
+
