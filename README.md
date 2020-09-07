@@ -1,11 +1,22 @@
-# Shopify-winter2021-private
-Image repo challenge
+# Shopify-winter2021- Backend Developer Intern Challenge
+Built an image repository which allows the user to register,login,upload new images,delete images,download images and share access of  images with there friends
 
 
-### Deploed the Api, Access the swagger ui 
+### Deployed the Api, Access the Swagger UI on the given url
 -  [Image Repository](https://imagerepo-shopify.herokuapp.com/ui/)
 
 
+# Table of Contents
+- [Authentication](#authentication)
+- [Model](#model)
+    - [Endpoints](#endpoints)
+- [Authentication](#authentication)
+- [User](#user)
+- [Images](#images)
+- [Permission](#permissions)
+- [Future Features](#future-features)
+- [Local Development](#local-development)
+- [Contact Me](#contact-me)
 
 ## Features
 
@@ -14,7 +25,7 @@ Image repo challenge
 </p>
 
 -  I chose JWT based authentication. The server generates a JWT token that verifies the user identity and sends it to the back to the client. 
-- I have created an admin which can be used to access which has access to all the functionalities in the Image Repository and can function as the root to access the details of other users
+- I have created an admin which can be used to access which has access to all the functionalities in the Image Repository and can function as the root to access the details of other users.By default the first user created is the admin user.
     ```
         username : admin
         password: admin
@@ -280,12 +291,8 @@ Image repo challenge
 - On firebase create a new project on  https://console.firebase.google.com/
 - Intialize firebase storage 
 - Create an admin user under authentication
-    ```
-    username : admin
-    password: admin
-    ```
 - Register app and add the Firebase config variables in certificate.py file
-- To get the the serviceAccount, go to project->settings->Firebase SDK snippet and then add the config variblaes
+- To get the the serviceAccount, go to project->settings->Firebase SDK snippet and then add the config variables
 - To run the app 
     ```
         docker-compose up --build
