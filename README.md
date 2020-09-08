@@ -298,7 +298,8 @@ Built an image repository which allows the user to register,login,upload new ima
 ```
 Heroku’s Cedar stack has an ephemeral filesystem. You can write to it, and you can read from it, but the contents will be cleared periodically.
 ```
-- Best way to test if the data is getting stored properly is to open two tabs and see that its working correctly 
+so when you close the tab the data from previous session gets deleted
+- Best way to test if it works properly is to open two tabs and test if  it  works properly
 - I will migrate to aws or gcp in the future releases.
 - Thankyou  for your time :) 
 

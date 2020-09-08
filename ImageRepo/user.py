@@ -1,6 +1,6 @@
 from flask import make_response, abort
 from config import db
-from models import Images, ImageSchema, User, UserSchema
+from models import Images, ImageSchema, User, UserSchema,Permissions
 from pathlib import Path
 import pyrebase
 import os
@@ -284,15 +284,20 @@ def delete_user(user_id):
         User.query.filter(User.id == user_id)
         .one_or_none()
     )
+    permissions = (
+        Permissions.query.filter(Permissions.user_id == user_id).all()
+    )
 
     # user exists
     if user is not None:
         db.session.delete(user)
+        if permissions is not None:
+            for permission in permissions:
+                db.session.delete(permission)
         db.session.commit()
         return make_response(
             "User has been deleted deleted", 204
         )
-
     # user doesnt exist
     else:
         abort(404, "User not found")
