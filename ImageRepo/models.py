@@ -10,11 +10,11 @@ class Permissions(db.Model):
     user_id = db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
     image_id = db.Column('image_id', db.Integer, db.ForeignKey('images.id'))
 
-
 class Images(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.String(300), nullable=False)
     download_token = db.Column(db.String(300), nullable=False)
+    admin_id = db.Column('admin_id', db.Integer, nullable=False)
     timestamp = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
@@ -45,7 +45,6 @@ class UserSchema(ModelSchema):
 
 
 class ImageSchema(ModelSchema):
-    
     class Meta:
         model = Images
         sqla_session = db.session

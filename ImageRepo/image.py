@@ -88,7 +88,7 @@ def upload(user_id):
     # build a copy of file type and change its name to the hash name
     image = file
     image.name = path
-
+    image.admin_user = int(user_id)
     # Login using Firebase
     fireb_user = firebase.auth().sign_in_with_email_and_password(
         ADMIN_EMAIL, ADMIN_PASSWORD)
@@ -106,7 +106,8 @@ def upload(user_id):
 
     file_obj = {
         "image": path,
-        "download_token": download_token
+        "download_token": download_token,
+        "admin_id": int(user_id)
     }
 
     # create a new image schema
@@ -332,18 +333,20 @@ def create_access(user_id, image_id):
             "Forbidden: The given user doesnt have an access"
         )
 
-    # Check if current user has permission for this image
-    check_permission = Permissions.query.filter(and_(
-        Permissions.user_id == user_id, Permissions.image_id == image_id)).one_or_none()
+   
+     # get the image which needs to be added to  the email_user
+    image = Images.query.filter(Images.id == image_id).filter(Images.admin_id == int(user_id)).one_or_none()
 
-    if check_permission is None:
+    if image is None:
         abort(
             403,
-            "Forbidden: The given user doesnt have an access to the given image"
+            "Forbidden: The given user doesnt have an admin access to the given image"
         )
 
     # search for the user with the given email address
     email_user = User.query.filter(User.email == email["email"]).one_or_none()
+
+    # verify admin 
 
     if email_user is None:
         abort(
@@ -372,8 +375,6 @@ def create_access(user_id, image_id):
             "Conflict: the permission already exists"
         )
 
-    # get the image which needs to be added to  the email_user
-    image = Images.query.filter(Images.id == image_id).one_or_none()
 
     schema = ImageSchema()
     # append the image to the user
