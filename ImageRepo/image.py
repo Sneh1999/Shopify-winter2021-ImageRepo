@@ -110,7 +110,7 @@ def upload(user_id):
         "admin_id": int(user_id)
     }
 
-    # create a new image schema
+     # create a new image schema
     new_image_schema = schema.load(file_obj, session=db.session)
 
     # Add the new image to the user
@@ -385,6 +385,7 @@ def create_access(user_id, image_id):
     new_image = Images.query.filter(Images.id == image_id).one_or_none()
     data = schema.dump(new_image)
     return data, 201
+
 
 
 def get_size(fobj):
