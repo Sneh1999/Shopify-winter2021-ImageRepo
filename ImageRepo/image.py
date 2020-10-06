@@ -115,7 +115,21 @@ def upload(user_id):
 
     # Add the new image to the user
     user.images.append(new_image_schema)
-    db.session.commit()
+    failed=False
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.flush()
+        failed=True
+
+    if failed:
+        # delete the image from firebase storage
+        storage.delete(path)
+        abort(
+            500, "Internal Server Error: the given image could not be stored "
+        )
+
     # Serialize and return the newly created image
     image = Images.query.order_by(Images.timestamp).filter(
         Images.image == path).one_or_none()
@@ -386,6 +400,68 @@ def create_access(user_id, image_id):
     data = schema.dump(new_image)
     return data, 201
 
+def revoke_access(user_id,image_id):
+    """
+    This function created to revoke the access of an image by the admin user to the user whose email is provided
+    :param user_id:   Id of user to find
+    :param image_id:   Id of image to find
+    :return:        201, return the image
+    """
+
+    # get the email from the request body
+    email = connexion.request.get_json()
+    # check if the user_id and the image_is provided is not null or empty string and email is not empty string or null
+    if user_id is None or user_id == "" or image_id is None or image_id == "" or email is None or email is {} or email["email"] is None or email["email"] is "":
+        abort(
+            400,
+            "Bad Request: Please send valid user Id, image Id and email"
+        )
+
+    token_info = connexion.context['token_info']
+
+    # Only the authorized user or the admin should be able to access the user details
+    if token_info['sub'] != str(user_id) and token_info['sub'] != ADMIN_USER:
+        abort(
+            403,
+            "Forbidden: The given user doesnt have an access"
+        )
+
+     # get the image which needs to be added to  the email_user
+    image = Images.query.filter(Images.id == image_id).filter(Images.admin_id == int(user_id)).one_or_none()
+
+    if image is None:
+        abort(
+            403,
+            "Forbidden: The given user doesnt have an admin access to the given image"
+        )
+    #  Check if the user with the email already has permission for this image
+    existing_permission = (db.session.query(
+        Permissions
+    ).filter(
+        User.id == Permissions.user_id,
+    ).filter(
+        Images.id == Permissions.image_id,
+    ).filter(
+        User.email == email["email"],
+    ).filter(
+        Images.id == image_id
+    )
+        .one_or_none()
+    )
+    # User with the email already has persmissions
+    if existing_permission is  None:
+        abort(
+             404,
+             "Not Found: The email user doesnt have  access to the given image"
+        )
+    
+            # Delete the permission from the db
+    db.session.delete(existing_permission)
+    db.session.commit()
+    schema = ImageSchema()
+    new_image = Images.query.filter(Images.id == image_id).one_or_none()
+    data = schema.dump(new_image)
+    return data, 201
 
 
 def get_size(fobj):

@@ -29,7 +29,7 @@ app = connexion.App(__name__, specification_dir='./',options={"swagger_ui": True
 app.add_api('swagger.yml')
 
 
-app.app.config['SECRET_KEY'] =  'thisisasecretkey'
+
 #Create a url route in our application for "/"
 
 @app.route('/')

@@ -280,14 +280,34 @@ Built an image repository which allows the user to register,login,upload new ima
             ]
         }
         ```
+- Now what if you want to revoke the access ?
+    - Sample Curl request:
+        ```
+        curl -X POST "http://0.0.0.0:5000/users/1/images/1/revoke" -H  "accept: application/json" -H  "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uemFsYW5kby5jb25uZXhpb24iLCJpYXQiOjE2MDIwMjI2NTUsImV4cCI6MTYwMjAyODY1NSwic3ViIjoiMSJ9.XfT6yOU07wTdl8Y8V2i4_LKxP8DyeRRbCFegMU18cIY" -H  "Content-Type: application/json" -d "{\"email\":\"st\"}"
+        ```
+    - Swagger ui interface
+        ![image](https://user-images.githubusercontent.com/35871990/95266148-a1a68880-0800-11eb-9acb-8dbdd976886b.png)
 
+    - Sample response body
+        ```
+        {
+            "admin_id": 1,
+            "download_token": "85a323fa-27a0-47b2-a031-89a1a414afb7",
+            "id": 1,
+            "image": "625f2c187e11d9ba08c46ef3dc7fb034ce5df17a0fa8316390d7f8411602022676",
+            "timestamp": "2020-10-06T22:17:57.482629",
+            "user": [
+                1
+            ]
+        }
+        ```
 <p align="center">
     <u><h2 align="center">Future Features</h2></u>
 </p>
 
 - Making multiple instances of my app and running a load balancer to balance the load between various instances so that the bulk images get uploaded faster 
 - Make the UI interface for the app
-- Have the  ability to revoke access to an image for another user
+- Have the  ability to revoke access to an image for another user[COMPLETED]
 - Building health checks for the instances 
 
 <p align="center">

@@ -535,6 +535,73 @@ paths:
           $ref: '#/components/responses/Conflict' 
         '5XX':
           description: Unexpected error.
+
+  /users/{user_id}/images/{image_id}/revoke:
+    post:
+      security:
+        - bearerAuth: []
+      operationId: image.revoke_access
+      summary: To provide revoke access of an image to a user for other user's image
+      description: This function helps one user(param = user_id) revoke access of his image(param = image_id) to another user(whose email is provided in the request body).Only the admin and the authorized user can use this functionality
+      parameters:
+        - name: user_id
+          in: path
+          description: 'Id of the user'
+          required: true
+          example: 1
+          schema:
+            type: integer
+        - name: image_id
+          in: path
+          description: 'Id of the image'
+          required: true
+          example: 1
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: email of the user
+      responses:
+        '201':
+          description: >-
+             Revoke was successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the image
+                  image:
+                    type: string
+                    description: Image name stored 
+                  user:
+                    type: array
+                    description: Array of the users
+                    items:
+                      type: integer
+                  timestamp:
+                    type: string
+                    description: Creation/Update timestamp of the image
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'    
+        '409':
+          $ref: '#/components/responses/Conflict' 
+        '5XX':
+          description: Unexpected error.
    
 components:
   schemas:
